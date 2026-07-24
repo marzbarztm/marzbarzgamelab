@@ -1,7 +1,477 @@
-<html>
-  <body>
-    <h1>MarzBarz Game Lab</h1>
-    <p>Custom games built different.</p>
-    <p>Play our first games here.</p>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MarzBarz Game Lab</title>
+
+  <meta
+    name="description"
+    content="MarzBarz Game Lab creates custom browser games for creators, brands, businesses, and communities."
+  >
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, #34105d 0%, #12051f 42%, #07030d 100%);
+      color: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1100px, 90%);
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(7, 3, 13, 0.88);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+    }
+
+    nav {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .logo span {
+      color: #ff4fd8;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-weight: 700;
+    }
+
+    .nav-links a:hover {
+      color: #ff4fd8;
+    }
+
+    .hero {
+      min-height: 78vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 90px 0;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 7px 14px;
+      border: 1px solid rgba(255, 79, 216, 0.5);
+      border-radius: 999px;
+      background: rgba(255, 79, 216, 0.1);
+      color: #ff9bea;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 900px;
+      margin: 0 auto;
+      font-size: clamp(3rem, 9vw, 7rem);
+      line-height: 0.95;
+      text-transform: uppercase;
+      letter-spacing: -3px;
+    }
+
+    h1 span {
+      display: block;
+      color: #ff4fd8;
+      text-shadow: 0 0 32px rgba(255, 79, 216, 0.55);
+    }
+
+    .hero p {
+      max-width: 700px;
+      margin: 28px auto 0;
+      color: #d9cbe4;
+      font-size: 1.15rem;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 34px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 24px;
+      border: 2px solid #ff4fd8;
+      border-radius: 10px;
+      font-weight: 900;
+      transition: 0.2s ease;
+    }
+
+    .button-primary {
+      background: #ff4fd8;
+      color: #16051f;
+      box-shadow: 0 0 25px rgba(255, 79, 216, 0.35);
+    }
+
+    .button-secondary {
+      background: transparent;
+      color: white;
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(255, 79, 216, 0.25);
+    }
+
+    section {
+      padding: 90px 0;
+    }
+
+    .section-heading {
+      margin-bottom: 36px;
+      text-align: center;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      text-transform: uppercase;
+    }
+
+    .section-heading p {
+      max-width: 650px;
+      margin: 12px auto 0;
+      color: #c9b7d5;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+    }
+
+    .game-card {
+      min-height: 330px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255, 79, 216, 0.22),
+          rgba(88, 44, 170, 0.12)
+        );
+      transition: 0.25s ease;
+    }
+
+    .game-card::before {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      top: -70px;
+      right: -70px;
+      border-radius: 50%;
+      background: rgba(255, 79, 216, 0.18);
+      filter: blur(8px);
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px);
+      border-color: #ff4fd8;
+    }
+
+    .game-card h3,
+    .game-card p,
+    .game-card .status {
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-card h3 {
+      margin-top: 14px;
+      font-size: 1.8rem;
+    }
+
+    .game-card p {
+      margin-top: 8px;
+      color: #d6c6df;
+    }
+
+    .status {
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffb8ee;
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .about {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 50px;
+    }
+
+    .about h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      text-transform: uppercase;
+    }
+
+    .about p {
+      margin-top: 18px;
+      color: #d2c1dc;
+    }
+
+    .lab-box {
+      padding: 32px;
+      border: 1px solid rgba(255, 79, 216, 0.3);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .lab-box div {
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .lab-box div:last-child {
+      border-bottom: 0;
+    }
+
+    .cta {
+      padding: 55px 30px;
+      text-align: center;
+      border: 1px solid rgba(255, 79, 216, 0.4);
+      border-radius: 24px;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(255, 79, 216, 0.16),
+          rgba(91, 41, 173, 0.18)
+        );
+    }
+
+    .cta h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      text-transform: uppercase;
+    }
+
+    .cta p {
+      max-width: 650px;
+      margin: 14px auto 0;
+      color: #d7c8e0;
+    }
+
+    footer {
+      padding: 35px 0;
+      text-align: center;
+      color: #aa98b6;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 760px) {
+      .nav-links {
+        display: none;
+      }
+
+      .game-grid,
+      .about {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        letter-spacing: -1px;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 80px 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <nav class="container">
+      <a href="#" class="logo">
+        MARZBARZ <span>GAME LAB</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="#games">Games</a>
+        <a href="#about">The Lab</a>
+        <a href="#contact">Get a Game</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="eyebrow">Welcome to the lab</div>
+
+        <h1>
+          Custom Games.
+          <span>Built Different.</span>
+        </h1>
+
+        <p>
+          MarzBarz Game Lab creates original browser games for creators,
+          brands, businesses, and communities. No download required—just
+          tap, play, and share.
+        </p>
+
+        <div class="button-row">
+          <a href="#games" class="button button-primary">Play Games</a>
+          <a href="#contact" class="button button-secondary">
+            Get Your Own Game
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="games">
+      <div class="container">
+        <div class="section-heading">
+          <h2>Enter the Arcade</h2>
+          <p>
+            New games and custom collaborations will appear here as the
+            MarzBarz universe expands.
+          </p>
+        </div>
+
+        <div class="game-grid">
+          <article class="game-card">
+            <span class="status">Coming Soon</span>
+            <h3>Last Beer Run</h3>
+            <p>
+              A custom MarzBarz browser-game experience built for Shaun Mecca.
+            </p>
+          </article>
+
+          <article class="game-card">
+            <span class="status">In the Lab</span>
+            <h3>Miko's Game</h3>
+            <p>
+              Another original game experience currently being prepared for
+              launch.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="container about">
+        <div>
+          <div class="eyebrow">Inside MarzBarz</div>
+
+          <h2>Games made for your audience.</h2>
+
+          <p>
+            We turn personalities, inside jokes, products, stories, and
+            communities into playable experiences people can open directly
+            from their phones.
+          </p>
+
+          <p>
+            Each project is designed to be easy to share, easy to play, and
+            impossible to confuse with another boring advertisement.
+          </p>
+        </div>
+
+        <div class="lab-box">
+          <div>
+            <strong>Creator Games</strong><br>
+            Custom games built around your personality and community.
+          </div>
+
+          <div>
+            <strong>Brand Games</strong><br>
+            Interactive campaigns that give people something worth sharing.
+          </div>
+
+          <div>
+            <strong>Browser Ready</strong><br>
+            No app-store download required.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="container">
+        <div class="cta">
+          <h2>Want Your Own Game?</h2>
+
+          <p>
+            MarzBarz Game Lab creates custom, shareable game experiences for
+            creators, businesses, events, and brands.
+          </p>
+
+          <div class="button-row">
+            <a
+              class="button button-primary"
+              href="mailto:hello@marzbarzgamelab.com"
+            >
+              Start a Project
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      © 2026 MarzBarz Game Lab. All rights reserved.
+    </div>
+  </footer>
+</body>
 </html>
