@@ -3,37 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#070510">
-  <meta name="description" content="MarzBarz Game Lab — original arcade experiences, experiments, and playable worlds.">
+  <meta name="theme-color" content="#030407">
+  <meta name="description" content="MarzBarz Game Lab — independent games built beyond the edge of ordinary.">
   <title>MarzBarz Game Lab</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #070510;
-      --panel: #100c1e;
-      --panel-2: #171129;
-      --paper: #f6f2ff;
-      --muted: #a9a0be;
-      --pink: #ff2bd6;
-      --cyan: #19e6ff;
-      --yellow: #f7ff58;
-      --violet: #8957ff;
-      --line: rgba(255,255,255,.12);
-      --max: 1180px;
+      --black: #030407;
+      --black-soft: #070911;
+      --blue: #2864ff;
+      --blue-deep: #1233b8;
+      --violet: #7938f2;
+      --violet-deep: #4716a3;
+      --cyan: #22e6ff;
+      --cyan-soft: #c7f8ff;
+      --cyan-muted: #77aeb8;
+      --glass: rgba(10, 14, 28, .58);
+      --glass-strong: rgba(9, 12, 24, .82);
+      --line: rgba(34, 230, 255, .18);
+      --max: 1200px;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      color: var(--paper);
+      color: var(--cyan-soft);
       background:
-        radial-gradient(circle at 18% 0%, rgba(137,87,255,.22), transparent 34rem),
-        radial-gradient(circle at 85% 14%, rgba(255,43,214,.14), transparent 30rem),
-        var(--ink);
-      font-family: "DM Mono", monospace;
+        radial-gradient(circle at 10% 8%, rgba(40, 100, 255, .22), transparent 30rem),
+        radial-gradient(circle at 88% 20%, rgba(121, 56, 242, .2), transparent 34rem),
+        radial-gradient(circle at 52% 90%, rgba(34, 230, 255, .08), transparent 30rem),
+        var(--black);
+      font-family: Inter, sans-serif;
       line-height: 1.6;
       overflow-x: hidden;
     }
@@ -42,343 +45,433 @@
       content: "";
       position: fixed;
       inset: 0;
+      z-index: -2;
       pointer-events: none;
-      z-index: 20;
-      opacity: .18;
-      background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.035) 3px 4px);
+      background-image:
+        linear-gradient(rgba(34, 230, 255, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 230, 255, .035) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(to bottom, black, transparent 72%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      opacity: .1;
+      background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(34, 230, 255, .08) 3px 4px);
     }
 
     a { color: inherit; text-decoration: none; }
-    button { font: inherit; }
+    button { color: inherit; font: inherit; }
     .wrap { width: min(calc(100% - 40px), var(--max)); margin-inline: auto; }
 
+    .glass {
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(40,100,255,.08), rgba(121,56,242,.05)), var(--glass);
+      box-shadow:
+        inset 0 1px 0 rgba(199,248,255,.08),
+        0 30px 80px rgba(0,0,0,.38);
+      backdrop-filter: blur(22px) saturate(135%);
+      -webkit-backdrop-filter: blur(22px) saturate(135%);
+    }
+
     .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      border-bottom: 1px solid var(--line);
-      background: rgba(7,5,16,.84);
-      backdrop-filter: blur(18px);
+      position: fixed;
+      inset: 18px 0 auto;
+      z-index: 20;
     }
 
     nav {
-      min-height: 74px;
+      min-height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 24px;
+      gap: 26px;
+      padding: 0 18px 0 12px;
+      border-radius: 18px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 11px;
       font-family: Orbitron, sans-serif;
-      font-weight: 900;
-      letter-spacing: -.04em;
+      font-size: .86rem;
+      font-weight: 800;
+      letter-spacing: -.025em;
     }
 
-    .brand-mark {
-      width: 34px;
-      height: 34px;
+    .brand-orb {
+      width: 40px;
+      aspect-ratio: 1;
       display: grid;
       place-items: center;
-      color: var(--ink);
-      background: var(--yellow);
-      border: 2px solid var(--paper);
-      box-shadow: 4px 4px 0 var(--pink);
-      transform: rotate(-5deg);
+      position: relative;
+      border: 1px solid rgba(34,230,255,.36);
+      border-radius: 12px;
+      color: var(--cyan);
+      background: linear-gradient(145deg, rgba(40,100,255,.32), rgba(121,56,242,.24));
+      box-shadow: inset 0 0 18px rgba(34,230,255,.08);
     }
 
-    .brand span:last-child { color: var(--cyan); }
-    .navlinks { display: flex; align-items: center; gap: 28px; color: var(--muted); font-size: .82rem; }
-    .navlinks a:hover, .navlinks a:focus-visible { color: var(--paper); }
+    .brand-orb::before,
+    .brand-orb::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      background: currentColor;
+      transform: translate(-50%,-50%);
+      box-shadow: 0 0 12px currentColor;
+    }
 
-    .mini-cta, .primary-cta, .ghost-cta {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
+    .brand-orb::before { width: 18px; height: 2px; }
+    .brand-orb::after { width: 2px; height: 18px; }
+    .brand .barz { color: var(--violet); }
+    .navlinks { display: flex; align-items: center; gap: 28px; color: var(--cyan-muted); font-size: .8rem; font-weight: 600; }
+    .navlinks a { transition: color .2s ease; }
+    .navlinks a:hover, .navlinks a:focus-visible { color: var(--cyan); }
+
+    .button {
       min-height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
       padding: 0 20px;
-      border: 1px solid var(--paper);
+      border: 1px solid rgba(34,230,255,.38);
+      border-radius: 12px;
       font-family: Orbitron, sans-serif;
-      font-size: .75rem;
+      font-size: .67rem;
       font-weight: 800;
-      letter-spacing: .08em;
+      letter-spacing: .1em;
       text-transform: uppercase;
-      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
-    .mini-cta, .primary-cta {
-      color: var(--ink);
-      background: var(--cyan);
-      box-shadow: 5px 5px 0 var(--pink);
+    .button:hover, .button:focus-visible { transform: translateY(-2px); border-color: var(--cyan); }
+    .button-primary {
+      color: var(--black);
+      background: linear-gradient(100deg, var(--cyan), var(--blue));
+      box-shadow: 0 10px 34px rgba(40,100,255,.28);
     }
-
-    .ghost-cta { background: rgba(255,255,255,.03); }
-    .mini-cta:hover, .primary-cta:hover, .ghost-cta:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--pink); }
+    .button-ghost { background: rgba(34,230,255,.04); }
 
     .hero {
-      min-height: calc(100vh - 74px);
+      min-height: 100vh;
       display: grid;
       align-items: center;
-      padding: 72px 0 92px;
       position: relative;
+      padding: 118px 0 70px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      left: -11rem;
+      top: 20%;
+      width: 28rem;
+      aspect-ratio: 1;
+      border: 1px solid rgba(34,230,255,.12);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 50px rgba(40,100,255,.025),
+        0 0 0 100px rgba(121,56,242,.018);
     }
 
     .hero-grid {
       display: grid;
       grid-template-columns: .88fr 1.12fr;
       align-items: center;
-      gap: clamp(42px,7vw,100px);
+      gap: clamp(44px,8vw,112px);
     }
 
-    .eyebrow {
+    .kicker {
       display: flex;
       align-items: center;
       gap: 12px;
       color: var(--cyan);
-      text-transform: uppercase;
-      letter-spacing: .16em;
-      font-size: .72rem;
-      font-weight: 500;
-    }
-
-    .eyebrow::before { content: ""; width: 32px; height: 2px; background: var(--pink); }
-    h1, h2, h3 { font-family: Orbitron, sans-serif; text-transform: uppercase; line-height: 1.02; }
-    h1 { margin: 20px 0 24px; font-size: clamp(3.3rem,7.4vw,7.5rem); letter-spacing: -.075em; }
-    h1 .stroke { color: transparent; -webkit-text-stroke: 2px var(--paper); }
-    h1 .accent { color: var(--pink); text-shadow: 5px 5px 0 rgba(25,230,255,.55); }
-    .hero-copy p { max-width: 540px; color: var(--muted); font-size: clamp(.95rem,1.5vw,1.08rem); }
-    .actions { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 34px; }
-
-    .video-shell {
-      position: relative;
-      isolation: isolate;
-      padding: 10px;
-      background: linear-gradient(135deg,var(--cyan),var(--violet) 48%,var(--pink));
-      clip-path: polygon(0 4%, 7% 4%, 7% 0, 95% 0, 95% 5%, 100% 5%, 100% 92%, 94% 92%, 94% 100%, 6% 100%, 6% 96%, 0 96%);
-      filter: drop-shadow(24px 28px 0 rgba(255,43,214,.13));
-    }
-
-    .video-shell::after {
-      content: "LOGO_SEQUENCE // LOOP_03";
-      position: absolute;
-      right: 28px;
-      bottom: 23px;
-      z-index: 2;
-      padding: 5px 9px;
-      color: var(--ink);
-      background: var(--yellow);
-      font-size: .58rem;
-      font-weight: 700;
-      letter-spacing: .08em;
-    }
-
-    video {
-      display: block;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      background: #000;
-      clip-path: polygon(0 4%, 7% 4%, 7% 0, 95% 0, 95% 5%, 100% 5%, 100% 92%, 94% 92%, 94% 100%, 6% 100%, 6% 96%, 0 96%);
-    }
-
-    .ticker {
-      overflow: hidden;
-      border-block: 1px solid var(--line);
-      background: var(--yellow);
-      color: var(--ink);
-      transform: rotate(-1deg) scale(1.02);
-    }
-
-    .ticker-track {
-      width: max-content;
-      display: flex;
-      gap: 26px;
-      padding: 12px 0;
       font-family: Orbitron, sans-serif;
-      font-weight: 900;
-      font-size: .85rem;
-      letter-spacing: .12em;
-      animation: marquee 24s linear infinite;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
     }
 
-    @keyframes marquee { to { transform: translateX(-50%); } }
-    section { padding: 112px 0; }
-    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 30px; margin-bottom: 44px; }
-    h2 { margin: 10px 0 0; font-size: clamp(2rem,5vw,4.2rem); letter-spacing: -.055em; }
-    .section-number { color: var(--pink); font-family: Orbitron, sans-serif; font-size: 1.1rem; }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: 1.3fr .7fr;
-      gap: 28px;
-      align-items: stretch;
+    .kicker::before {
+      content: "";
+      width: 8px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 16px var(--cyan);
     }
 
-    .media-card {
+    h1, h2, h3 { font-family: Orbitron, sans-serif; line-height: 1.03; text-transform: uppercase; }
+    h1 {
+      max-width: 700px;
+      margin: 22px 0 26px;
+      font-size: clamp(3.5rem,7.2vw,7.25rem);
+      letter-spacing: -.08em;
+    }
+
+    h1 span {
+      display: block;
+      color: transparent;
+      background: linear-gradient(90deg, var(--blue), var(--violet));
+      -webkit-background-clip: text;
+      background-clip: text;
+      filter: drop-shadow(0 0 26px rgba(40,100,255,.18));
+    }
+
+    .hero-copy p { max-width: 560px; color: var(--cyan-muted); font-size: clamp(.98rem,1.5vw,1.1rem); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+    .system-note { margin-top: 34px; color: rgba(119,174,184,.7); font-family: Orbitron, sans-serif; font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; }
+
+    .logo-frame {
+      width: min(100%, 620px);
+      aspect-ratio: 1 / 1;
       position: relative;
-      min-height: 460px;
-      padding: 10px;
+      margin-inline: auto;
+      padding: 11px;
       overflow: hidden;
-      border: 1px solid var(--line);
-      background: linear-gradient(135deg,var(--pink),var(--violet) 50%,var(--cyan));
-      box-shadow: 14px 14px 0 rgba(137,87,255,.14);
+      border-radius: 36px;
+      background:
+        linear-gradient(var(--black-soft), var(--black-soft)) padding-box,
+        linear-gradient(135deg, var(--blue), var(--cyan) 48%, var(--violet)) border-box;
+      border: 1px solid transparent;
+      box-shadow:
+        0 0 0 1px rgba(34,230,255,.09),
+        0 45px 120px rgba(0,0,0,.55),
+        0 0 100px rgba(40,100,255,.12);
     }
 
-    .media-card video {
+    .logo-frame::before {
+      content: "";
+      position: absolute;
+      inset: -45%;
+      z-index: 0;
+      background: conic-gradient(from 90deg, transparent, rgba(34,230,255,.12), transparent 24%, rgba(121,56,242,.14), transparent 54%);
+      animation: rotate 12s linear infinite;
+    }
+
+    .logo-frame::after {
+      content: "IDENT // MARZBARZ_001";
+      position: absolute;
+      right: 24px;
+      bottom: 18px;
+      z-index: 4;
+      color: rgba(34,230,255,.62);
+      font-family: Orbitron, sans-serif;
+      font-size: .5rem;
+      letter-spacing: .14em;
+    }
+
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    .logo-media {
       width: 100%;
       height: 100%;
-      min-height: 440px;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      clip-path: none;
-    }
-
-    .play-badge {
-      position: absolute;
-      inset: 50% auto auto 50%;
-      width: 76px;
-      height: 76px;
-      display: grid;
-      place-items: center;
-      border: 2px solid var(--paper);
-      border-radius: 50%;
-      color: var(--ink);
-      background: var(--yellow);
-      box-shadow: 7px 7px 0 var(--pink);
-      font-family: Orbitron, sans-serif;
-      font-size: 1.2rem;
-      transform: translate(-50%,-50%);
-      pointer-events: none;
-    }
-
-    .feature-copy {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: clamp(28px,4vw,54px);
-      border: 1px solid var(--line);
-      background: var(--panel);
-    }
-
-    .feature-copy h3 { margin: 14px 0 18px; font-size: clamp(2rem,4vw,3.5rem); letter-spacing: -.05em; }
-    .feature-copy p { color: var(--muted); }
-    .feature-copy .ghost-cta { align-self: flex-start; margin-top: 20px; }
-
-    .games {
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 18px;
-    }
-
-    .game-card {
-      min-height: 350px;
       position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 28px;
+      z-index: 1;
       overflow: hidden;
-      border: 1px solid var(--line);
-      background: var(--panel);
-      transition: transform .25s ease, border-color .25s ease;
+      border-radius: 26px;
+      background: var(--black);
     }
 
-    .game-card::before {
+    .logo-media video,
+    .logo-media img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-position: center;
+      background: var(--black);
+    }
+
+    .logo-media video { object-fit: cover; }
+    .logo-media img {
+      position: absolute;
+      inset: 0;
+      object-fit: contain;
+      opacity: 0;
+      transform: scale(.96);
+      transition: opacity .28s ease, transform .35s ease;
+    }
+
+    .logo-media.is-finished video { opacity: 0; pointer-events: none; }
+    .logo-media.is-finished img { opacity: 1; transform: scale(1); }
+    .frame-corner { position: absolute; z-index: 3; width: 46px; height: 46px; pointer-events: none; }
+    .frame-corner.tl { left: 22px; top: 22px; border-left: 2px solid var(--cyan); border-top: 2px solid var(--cyan); }
+    .frame-corner.br { right: 22px; bottom: 22px; border-right: 2px solid var(--violet); border-bottom: 2px solid var(--violet); }
+
+    .status-strip {
+      border-block: 1px solid var(--line);
+      background: rgba(3,4,7,.76);
+      backdrop-filter: blur(16px);
+      overflow: hidden;
+    }
+
+    .status-inner {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      color: var(--cyan-muted);
+      font-family: Orbitron, sans-serif;
+      font-size: .6rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .status-live { display: flex; align-items: center; gap: 10px; color: var(--cyan); }
+    .status-live::before { content: ""; width: 7px; aspect-ratio: 1; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 14px var(--cyan); }
+    section.content { padding: 110px 0; }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 38px;
+    }
+
+    h2 { margin: 14px 0 0; font-size: clamp(2.35rem,5.2vw,5rem); letter-spacing: -.065em; }
+    .section-code { color: rgba(34,230,255,.45); font-family: Orbitron, sans-serif; font-size: .62rem; letter-spacing: .16em; }
+
+    .game-panel {
+      display: grid;
+      grid-template-columns: 1.28fr .72fr;
+      overflow: hidden;
+      border-radius: 30px;
+    }
+
+    .game-media {
+      min-height: 520px;
+      position: relative;
+      overflow: hidden;
+      background: var(--black);
+    }
+
+    .game-media video { width: 100%; height: 100%; display: block; object-fit: cover; }
+    .game-media::after {
       content: "";
       position: absolute;
       inset: 0;
-      background:
-        linear-gradient(180deg,transparent 20%,rgba(7,5,16,.88)),
-        radial-gradient(circle at 60% 28%,var(--card-color),transparent 34%);
-      opacity: .7;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent 55%, rgba(3,4,7,.46)), linear-gradient(0deg, rgba(40,100,255,.14), transparent 45%);
     }
 
-    .game-card::after {
-      content: "";
+    .media-label {
       position: absolute;
-      width: 170px;
-      height: 170px;
-      right: -26px;
-      top: 30px;
-      border: 20px solid rgba(255,255,255,.13);
-      transform: rotate(35deg);
+      left: 22px;
+      top: 22px;
+      z-index: 2;
+      padding: 8px 11px;
+      border: 1px solid rgba(34,230,255,.28);
+      border-radius: 8px;
+      color: var(--cyan);
+      background: rgba(3,4,7,.74);
+      backdrop-filter: blur(10px);
+      font-family: Orbitron, sans-serif;
+      font-size: .55rem;
+      letter-spacing: .14em;
     }
 
-    .game-card:hover { transform: translateY(-8px); border-color: var(--card-color); }
-    .game-card > * { position: relative; z-index: 1; }
-    .game-card small { color: var(--card-color); text-transform: uppercase; letter-spacing: .14em; }
-    .game-card h3 { margin: 10px 0; font-size: 1.55rem; }
-    .game-card p { margin: 0; color: var(--muted); font-size: .86rem; }
-    .status { align-self: flex-start; margin-bottom: auto; padding: 5px 9px; border: 1px solid currentColor; color: var(--yellow); font-size: .62rem; text-transform: uppercase; }
+    .game-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(34px,5vw,70px);
+      border-left: 1px solid var(--line);
+    }
 
-    .manifesto {
+    .game-index { color: var(--cyan); font-family: Orbitron, sans-serif; font-size: .62rem; letter-spacing: .18em; }
+    .game-copy h3 { margin: 18px 0 20px; font-size: clamp(2.35rem,4.4vw,4.8rem); letter-spacing: -.07em; }
+    .game-copy p { color: var(--cyan-muted); }
+    .game-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 28px; }
+    .game-tag { padding: 6px 9px; border: 1px solid rgba(34,230,255,.18); border-radius: 7px; color: var(--cyan-muted); font-size: .68rem; }
+
+    .lab-panel {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 70px;
+      gap: 60px;
       align-items: center;
-      padding: 64px;
+      padding: clamp(34px,6vw,76px);
+      border-radius: 30px;
+    }
+
+    .lab-panel p { color: var(--cyan-muted); }
+    .signal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .signal {
+      min-height: 142px;
+      padding: 22px;
       border: 1px solid var(--line);
-      background: linear-gradient(135deg,rgba(137,87,255,.13),rgba(255,43,214,.07)),var(--panel);
-      box-shadow: 12px 12px 0 rgba(25,230,255,.1);
+      border-radius: 18px;
+      background: rgba(34,230,255,.025);
     }
+    .signal strong { display: block; margin-bottom: 12px; color: var(--cyan); font-family: Orbitron, sans-serif; font-size: 1.45rem; }
+    .signal span { color: var(--cyan-muted); font-size: .72rem; }
 
-    .manifesto p { color: var(--muted); }
-    .stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
-    .stat { padding: 24px; border: 1px solid var(--line); background: rgba(7,5,16,.48); }
-    .stat strong { display: block; color: var(--cyan); font-family: Orbitron, sans-serif; font-size: 1.75rem; }
-    .stat span { color: var(--muted); font-size: .68rem; text-transform: uppercase; }
+    footer { padding: 38px 0; border-top: 1px solid var(--line); color: rgba(119,174,184,.7); }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; font-size: .68rem; }
+    .footer-mark { color: var(--cyan); font-family: Orbitron, sans-serif; letter-spacing: .1em; }
 
-    footer { padding: 44px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .75rem; }
-    .footer-inner { display: flex; justify-content: space-between; gap: 24px; }
-
-    @media (max-width: 850px) {
-      .navlinks { display: none; }
-      .hero { padding-top: 48px; }
-      .hero-grid, .manifesto, .feature-grid { grid-template-columns: 1fr; }
+    @media (max-width: 900px) {
+      .hero { padding-top: 118px; }
+      .hero-grid, .game-panel, .lab-panel { grid-template-columns: 1fr; }
       .hero-copy { text-align: center; }
-      .hero-copy .eyebrow, .actions { justify-content: center; }
+      .hero-copy .kicker, .hero-actions { justify-content: center; }
       .hero-copy p { margin-inline: auto; }
-      .video-shell { max-width: 620px; margin-inline: auto; }
-      .games { grid-template-columns: 1fr; }
-      .game-card { min-height: 300px; }
-      .manifesto { padding: 36px 24px; }
-      .media-card, .media-card video { min-height: 320px; }
+      .system-note { text-align: center; }
+      .logo-frame { max-width: 610px; }
+      .game-copy { border-left: 0; border-top: 1px solid var(--line); }
+      .game-media { min-height: 430px; }
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 620px) {
       .wrap { width: min(calc(100% - 24px), var(--max)); }
-      .mini-cta { display: none; }
-      nav { min-height: 64px; }
-      h1 { font-size: clamp(3rem,19vw,5rem); }
-      .actions > * { width: 100%; }
-      section { padding: 76px 0; }
-      .stats { grid-template-columns: 1fr; }
-      .footer-inner { flex-direction: column; }
+      .topbar { top: 10px; }
+      nav { min-height: 58px; border-radius: 15px; }
+      .navlinks, nav > .button { display: none; }
+      h1 { font-size: clamp(3.4rem,19vw,5.3rem); }
+      .hero-actions .button { width: 100%; }
+      .logo-frame { padding: 7px; border-radius: 24px; }
+      .logo-media { border-radius: 18px; }
+      .status-inner { justify-content: center; }
+      .status-inner > span:not(.status-live) { display: none; }
+      section.content { padding: 78px 0; }
+      .section-head { align-items: flex-start; flex-direction: column; gap: 12px; }
+      .game-panel, .lab-panel { border-radius: 22px; }
+      .game-media { min-height: 290px; }
+      .game-copy { padding: 32px 24px; }
+      .signal-grid { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      .ticker-track { animation: none; }
+      .logo-frame::before { animation: none; }
       * { transition: none !important; }
     }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <nav class="wrap" aria-label="Primary navigation">
+    <nav class="wrap glass" aria-label="Primary navigation">
       <a class="brand" href="#top" aria-label="MarzBarz Game Lab home">
-        <span class="brand-mark">M</span>
-        <span>MARZ<span>BARZ</span></span>
+        <span class="brand-orb" aria-hidden="true"></span>
+        <span>MARZ<span class="barz">BARZ</span></span>
       </a>
       <div class="navlinks">
-        <a href="#games">Games</a>
+        <a href="#game">The Game</a>
         <a href="#lab">The Lab</a>
         <a href="#contact">Connect</a>
       </div>
-      <a class="mini-cta" href="#games">Enter Arcade</a>
+      <a class="button button-ghost" href="#game">Enter the lab</a>
     </nav>
   </header>
 
@@ -386,69 +479,81 @@
     <section class="hero">
       <div class="wrap hero-grid">
         <div class="hero-copy">
-          <div class="eyebrow">Independent game studio</div>
-          <h1><span class="stroke">Play</span><br><span class="accent">Beyond.</span></h1>
-          <p>We build vibrant worlds, strange challenges, and unforgettable arcade moments. Welcome to the lab—every experiment starts with play.</p>
-          <div class="actions">
-            <a class="primary-cta" href="#games">Explore the Lab</a>
-            <a class="ghost-cta" href="#contact">Follow the Journey</a>
+          <div class="kicker">Independent game studio</div>
+          <h1>Play past<br><span>the edge.</span></h1>
+          <p>Original worlds with arcade energy, modern polish, and just enough chaos. Welcome to MarzBarz Game Lab.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#game">Explore Shaun Mecca</a>
+            <a class="button button-ghost" href="#lab">Enter the lab</a>
           </div>
+          <div class="system-note">System 001 // signal stable // player ready</div>
         </div>
-        <div class="video-shell">
-          <video autoplay muted loop playsinline aria-label="Animated MarzBarz Game Lab logo">
-            <source src="MarzBarzLogo.mp4" type="video/mp4">
-            Your browser does not support the animated MarzBarz logo.
-          </video>
+
+        <div class="logo-frame glass">
+          <span class="frame-corner tl" aria-hidden="true"></span>
+          <span class="frame-corner br" aria-hidden="true"></span>
+          <div class="logo-media" id="logoMedia">
+            <video id="logoVideo" autoplay muted playsinline preload="auto" aria-label="Animated MarzBarz Game Lab logo">
+              <source src="MarzBarzLogo.mp4" type="video/mp4">
+            </video>
+            <img src="marzbarz.png" alt="MarzBarz Game Lab">
+          </div>
         </div>
       </div>
     </section>
 
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker-track">
-        <span>NEW WORLDS LOADING</span><span>✦</span><span>ARCADE ENERGY</span><span>✦</span><span>PLAY THE EXPERIMENT</span><span>✦</span><span>MARZBARZ GAME LAB</span><span>✦</span>
-        <span>NEW WORLDS LOADING</span><span>✦</span><span>ARCADE ENERGY</span><span>✦</span><span>PLAY THE EXPERIMENT</span><span>✦</span><span>MARZBARZ GAME LAB</span><span>✦</span>
+    <div class="status-strip">
+      <div class="wrap status-inner">
+        <span class="status-live">MarzBarz signal online</span>
+        <span>Independent worlds // built to play</span>
+        <span>Game 001 // Shaun Mecca</span>
       </div>
     </div>
 
-    <section id="games">
+    <section class="content" id="game">
       <div class="wrap">
         <div class="section-head">
           <div>
-            <div class="eyebrow">Now loading</div>
-            <h2>Featured game</h2>
+            <div class="kicker">Currently in the lab</div>
+            <h2>Shaun Mecca</h2>
           </div>
-          <span class="section-number">01 / PLAY</span>
+          <span class="section-code">GAME_FILE // 001</span>
         </div>
-        <div class="feature-grid">
-          <div class="media-card">
-            <video autoplay muted loop playsinline controls aria-label="Shaun Mecca game preview">
+
+        <article class="game-panel glass">
+          <div class="game-media">
+            <video muted loop playsinline controls preload="metadata" aria-label="Shaun Mecca game preview">
               <source src="shaunmecca.mp4" type="video/mp4">
-              Your browser does not support the Shaun Mecca game preview.
             </video>
-            <span class="play-badge" aria-hidden="true">▶</span>
+            <span class="media-label">Preview feed // online</span>
           </div>
-          <div class="feature-copy">
-            <div class="eyebrow">Game 001</div>
-            <h3>Shaun<br>Mecca</h3>
-            <p>The first title from MarzBarz Game Lab. Watch the preview and get ready to enter Shaun Mecca’s world.</p>
-            <a class="ghost-cta" href="#games">Watch preview</a>
+          <div class="game-copy">
+            <span class="game-index">01 // Featured title</span>
+            <h3>One last<br>beer run.</h3>
+            <p>The first world from MarzBarz Game Lab. Watch the transmission and step into Shaun Mecca’s story.</p>
+            <div class="game-tags">
+              <span class="game-tag">Independent</span>
+              <span class="game-tag">In development</span>
+              <span class="game-tag">Game 001</span>
+            </div>
+            <a class="button button-primary" href="#game">Watch the preview</a>
           </div>
-        </div>
+        </article>
       </div>
     </section>
 
-    <section id="lab">
-      <div class="wrap manifesto">
+    <section class="content" id="lab">
+      <div class="wrap lab-panel glass">
         <div>
-          <div class="eyebrow">Built different</div>
-          <h2>Small lab.<br>Big worlds.</h2>
-          <p>MarzBarz Game Lab is an independent creative playground where bold art, responsive gameplay, and pure curiosity collide. No formulas—just memorable ideas made playable.</p>
+          <div class="kicker">The MarzBarz protocol</div>
+          <h2>Retro soul.<br>Future finish.</h2>
+          <p>MarzBarz Game Lab is a place for distinctive worlds, responsive play, and ideas that refuse to stay ordinary. We build with the energy of the arcade and the clarity of modern design.</p>
         </div>
-        <div class="stats">
-          <div class="stat"><strong>∞</strong><span>Ideas in orbit</span></div>
-          <div class="stat"><strong>01</strong><span>Independent lab</span></div>
-          <div class="stat"><strong>100%</strong><span>Original energy</span></div>
-          <div class="stat"><strong>YOU</strong><span>Player one</span></div>
+        <div class="signal-grid">
+          <div class="signal"><strong>01</strong><span>Original title in development</span></div>
+          <div class="signal"><strong>∞</strong><span>Ideas waiting in orbit</span></div>
+          <div class="signal"><strong>100%</strong><span>Independent creative energy</span></div>
+          <div class="signal"><strong>YOU</strong><span>Player one, always</span></div>
         </div>
       </div>
     </section>
@@ -456,9 +561,31 @@
 
   <footer id="contact">
     <div class="wrap footer-inner">
-      <div>© 2026 MARZBARZ GAME LAB // ALL SYSTEMS NOMINAL</div>
-      <div>MADE FOR PLAYERS, DREAMERS &amp; BUTTON MASHERS</div>
+      <span class="footer-mark">MARZBARZ GAME LAB</span>
+      <span>© 2026 // ALL SYSTEMS NOMINAL</span>
     </div>
   </footer>
+
+  <script>
+    (() => {
+      const media = document.getElementById("logoMedia");
+      const video = document.getElementById("logoVideo");
+      if (!media || !video) return;
+
+      const showLogo = () => {
+        media.classList.add("is-finished");
+        video.pause();
+      };
+
+      video.addEventListener("ended", showLogo, { once: true });
+      video.addEventListener("error", showLogo, { once: true });
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        showLogo();
+      } else {
+        video.play().catch(showLogo);
+      }
+    })();
+  </script>
 </body>
 </html>
