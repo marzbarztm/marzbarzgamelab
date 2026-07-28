@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Shaun Mecca's Last Beer Run</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000;
+    touch-action: none; overscroll-behavior: none; user-select: none; -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  body { position: fixed; inset: 0; }
+  #wrap { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; background:#000; }
+  canvas { display:block; background:#000; touch-action:none; max-width:100%; max-height:100%; }
+  #rotate {
+    display:none; position:absolute; inset:0; z-index:10; background:#000; color:#fff;
+    align-items:center; justify-content:center; text-align:center; padding:32px; font:700 22px/1.3 system-ui,sans-serif;
+  }
+  #backToLab {
+    position: fixed; z-index: 20; left: max(12px, env(safe-area-inset-left)); top: max(12px, env(safe-area-inset-top));
+    display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px;
+    border: 1px solid rgba(34,230,255,.34); border-radius: 12px; color: #c7f8ff;
+    background: rgba(3,4,7,.66); box-shadow: inset 0 1px 0 rgba(199,248,255,.08), 0 12px 32px rgba(0,0,0,.3);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    font: 700 11px/1 system-ui,sans-serif; letter-spacing: .1em; text-decoration: none; text-transform: uppercase;
+    touch-action: manipulation;
+  }
+  #backToLab:hover, #backToLab:focus-visible { border-color:#22e6ff; color:#22e6ff; }
+  @media (orientation: landscape) and (max-height: 600px) { #rotate { display:flex; } }
+</style>
+</head>
+<body>
+<a id="backToLab" href="../../" aria-label="Return to MarzBarz Game Lab">← Game Lab</a>
+<div id="wrap"><canvas id="game" width="1080" height="1920" aria-label="Shaun Mecca's Last Beer Run"></canvas></div>
+<div id="rotate">Turn your phone upright to play.</div>
+<script>
+(() => {
+'use strict';
+
+const W = 1080, H = 1920;
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d', { alpha: false });
+ctx.imageSmoothingEnabled = true;
+
+// Prevent iPhone Safari pinch/double-tap zoom while playing.
+document.addEventListener('gesturestart', e => e.preventDefault(), { passive:false });
+document.addEventListener('gesturechange', e => e.preventDefault(), { passive:false });
+document.addEventListener('gestureend', e => e.preventDefault(), { passive:false });
+document.addEventListener('dblclick', e => e.preventDefault(), { passive:false });
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouchEnd < 350) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive:false });
+document.addEventListener('touchmove', e => e.preventDefault(), { passive:false });
+
+function fitCanvas() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const scale = Math.min(vw / W, vh / H);
+  canvas.style.width = `${Math.floor(W * scale)}px`;
+  canvas.style.height = `${Math.floor(H * scale)}px`;
+}
+window.addEventListener('resize', fitCanvas);
+window.addEventListener('orientationchange', fitCanvas);
+fitCanvas();
+
+const A = 'assets/';
+const AU = 'audio/';
+
+const imageNames = [
+  'Screen_Home.png','Screen_Gameplay.png','Screen_BonusRound.png','Screen_GameOver.png','Screen_HighScore.png','Screen_Pause.png','Screen_Rules.png',
+  'Home_ThreeFriends_Group.png','HighScore_ThreeFriends_Group.png','GameOver_ThreeFriends_Group.png','Friend3_BonusRoundPose.png',
+  'Logo_ShaunMeccasLastBeerRun.png','Popup_PushToStart.png','Popup_DidSomeoneSayLoneStar.png','Popup_NewHighScore.png','Popup_WeDidIt.png','Popup_GameOver.png','Popup_PlayAgain.png','Popup_Paused.png','PopUp_TheLonestars.png',
+  'Button_Rules.png','Button_Back.png','button_music.png','button_sound.png','button_pause.png','button_move_left.png','button_move_right.png','button_jump.png','button_power_star.png',
+  'icon_heart_full.png','icon_heart_empty.png','icon_beer_full.png','icon_beer_empty.png','icon_coin.png',
+  'Intro_01_Friend1_AskingForBeer.png','Intro_02_Friend2_SearchingForBeer.png','Intro_03_TheLoneStars.png','Intro_04_Friend1_Shocked.png',
+  'Player_Idle.png','Player_Run_01.png','Player_Run_02.png','Player_Run_03.png','Player_Jump.png','Player_Hurt.png','Player_PowerUp.png','Player_Victory_Front.png',
+  'Effect_BeerPickup.png','Effect_BonusBurst.png','Effect_CoinSparkle.png','Effect_Dust.png','Effect_Hit.png','Effect_Jump.png','Effect_StarSparkle.png',
+  'beer_collectible.png','beer_finalbeer.png','coin_collectible.png',
+  'Obstacle_Boxes.png','Obstacle_Cactus.png','Obstacle_CrushedCan.png','Obstacle_NoBeer.png','Obstacle_Spill.png','Obstacle_TrashCan.png'
+];
+const IMG = {};
+let loadedImages = 0;
+imageNames.forEach(name => {
+  const img = new Image();
+  img.src = A + encodeURIComponent(name).replaceAll('%2F','/');
+  img.onload = () => loadedImages++;
+  img.onerror = () => console.warn('Image failed:', name);
+  IMG[name] = img;
+});
+
+const audioMap = {
+  main: 'music_main_loop.mp3', bonus: 'music_bonus.mp3', high: 'music_highscore.mp3', gameover: 'music_gameover.mp3',
+  button: 'sfx_button_press.wav', coin: 'sfx_coin_collect.wav', beer: 'sfx_beer_collect.wav', beerLost: 'sfx_beer_lost.wav',
+  heartLost: 'sfx_heart_lost.wav', obstacle: 'sfx_obstacle_hit.mp3', jump: 'sfx_jump.mp3', lane: 'sfx_lane_move.mp3',
+  powerReady: 'sfx_power_ready.mp3', powerActivate: 'sfx_power_activate.mp3', twelve: 'sfx_12_beers_complete.wav', bonusStart: 'sfx_bonus_start.wav',
+  highSfx: 'sfx_high_score.wav', gameoverSfx: 'sfx_game_over.wav', fridge: 'sfx_intro_fridge_open.mp3', reaction: 'sfx_intro_reaction.mp3',
+  introHey: 'voice_intro_hey_dude_another_lonestar.wav', introLone: 'voice_intro_the_lonestars.wav', bonusVoice: 'voice_did_someone_say_lone_star.wav'
+};
+const SND = {};
+Object.entries(audioMap).forEach(([k,f]) => {
+  const a = new Audio(AU + encodeURIComponent(f).replaceAll('%2F','/'));
+  a.preload = 'auto';
+  SND[k] = a;
+});
+SND.main.loop = true; SND.main.volume = 0.34;
+SND.main.autoplay = true;
+SND.main.playsInline = true;
+SND.main.setAttribute('autoplay','');
+SND.main.setAttribute('playsinline','');
+SND.introHey.volume = 1.0;
+SND.bonus.loop = false; SND.bonus.volume = 0.58;
+SND.high.volume = 0.55; SND.gameover.volume = 0.55;
+
+let audioUnlocked = false;
+function unlockAllAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  // Do NOT silently play/pause every clip here. The previous priming method could
+  // race against Intro 01 and stop/mute the voice line on iPhone Safari.
+  // Instead, use the first real user gesture to guarantee the home music is active.
+  if (musicOn && (state==='home' || state==='intro')) {
+    SND.main.loop = true;
+    SND.main.volume = state==='intro' ? 0.18 : 0.34;
+    safePlay(SND.main, false);
+  }
+}
+
+let musicOn = true, soundOn = true;
+function safePlay(a, restart=true) {
+  if (!a) return;
+  if (restart) { try { a.currentTime = 0; } catch {} }
+  const p = a.play(); if (p?.catch) p.catch(()=>{});
+}
+function playSfx(key) { if (soundOn) safePlay(SND[key]); }
+function playMusic(key, restart=false) { if (musicOn) safePlay(SND[key], restart); }
+function stopAudio(a) { if (!a) return; a.pause(); try { a.currentTime = 0; } catch {} }
+function stopMusicExcept(key) {
+  ['main','bonus','high','gameover'].forEach(k => { if (k !== key) SND[k].pause(); });
+}
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+function waitAudio(key, fallback=2600, startPlayback=true) {
+  return new Promise(resolve => {
+    const a = SND[key];
+    if (!soundOn || !a) { setTimeout(resolve, fallback); return; }
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      a.removeEventListener('ended', finish);
+      clearTimeout(t);
+      resolve();
+    };
+    a.addEventListener('ended', finish, { once:true });
+    const t = setTimeout(finish, fallback);
+    if (startPlayback) safePlay(a);
+  });
+}
+
+const obstacleImages = ['Obstacle_Boxes.png','Obstacle_Cactus.png','Obstacle_CrushedCan.png','Obstacle_NoBeer.png','Obstacle_Spill.png','Obstacle_TrashCan.png'];
+
+let state = 'home';
+let previousState = 'home';
+let introStep = 0, intro3Popup = false, fadeAlpha = 0;
+let playerLane = 0, targetLane = 0, playerX = W/2;
+let jumpT = 0, jumping = false, hurtT = 0, invincible = 0;
+let hearts = 5, beers = 0, coins = 0, score = 0;
+let highScore = Number(localStorage.getItem('shaunLastBeerRunHighScore') || 0);
+let objects = [], spawnClock = 0;
+let effects = [];
+let lastSafeLane = 0, rowsSinceBeer = 0;
+let baseSpeed = 1, speedMultiplier = 1;
+let powerReady = false, powerAnimating = false;
+let bonusTime = 0, bonusIntroElapsed = 0, bonusIntroFade = 1;
+let completedBonuses = 0, postBonusSpawnPause = 0;
+let runTime = 0;
+let last = performance.now();
+
+const horizonY = 650, groundY = 1510, laneSpread = 295;
+const controls = {
+  left:  { cx:145, cy:1700, draw:235, hit:{x:0,y:1515,w:390,h:405} },
+  right: { cx:935, cy:1700, draw:235, hit:{x:690,y:1515,w:390,h:405} },
+  star:  { cx:145, cy:1375, draw:205, hit:{x:0,y:1190,w:390,h:330} },
+  jump:  { cx:935, cy:1375, draw:205, hit:{x:690,y:1190,w:390,h:330} }
+};
+
+function rectHit(r,x,y){ return x>=r.x && x<=r.x+r.w && y>=r.y && y<=r.y+r.h; }
+function pointerPos(e){
+  const r = canvas.getBoundingClientRect();
+  return { x:(e.clientX-r.left)*W/r.width, y:(e.clientY-r.top)*H/r.height };
+}
+
+canvas.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  unlockAllAudio();
+  const p = pointerPos(e);
+  handlePress(p.x,p.y);
+}, { passive:false });
+
+window.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft') moveLane(-1);
+  else if (e.key === 'ArrowRight') moveLane(1);
+  else if (e.key === ' ' || e.key === 'ArrowUp') doJump();
+  else if (e.key.toLowerCase() === 'b') activateBonus();
+});
+
+function handlePress(x,y){
+  if (state === 'home') {
+    if (x > 760 && y > 1520) { playSfx('button'); state='rules'; return; }
+    if (x < 220 && y < 260) { toggleMusic(); return; }
+    if (x > 860 && y < 260) { toggleSound(); return; }
+    // Push-to-Start: prioritize the spoken Intro 01 line on the user's gesture.
+    // Avoid firing the button SFX first, which can steal the first iPhone audio unlock.
+    startFirstPlay(); return;
+  }
+  if (state === 'rules') { playSfx('button'); state = previousState === 'paused' ? 'paused' : 'home'; return; }
+  if (state === 'paused') {
+    if (y > 1480 && x < 360) { previousState='paused'; state='rules'; return; }
+    if (y > 1480 && x > 720) { toggleMusic(); return; }
+    const resumeState = previousState==='bonus' ? 'bonus' : 'gameplay';
+    state=resumeState;
+    if (musicOn) playMusic(resumeState==='bonus'?'bonus':'main', false);
+    return;
+  }
+  if (state === 'gameover' || state === 'highscore') { if (y > 1300) restartRun(); return; }
+  if (state !== 'gameplay' && state !== 'bonus') return;
+  if (x > 905 && y < 220) { pauseGame(); return; }
+  if (rectHit(controls.left.hit,x,y)) { moveLane(-1); return; }
+  if (rectHit(controls.right.hit,x,y)) { moveLane(1); return; }
+  if (rectHit(controls.jump.hit,x,y)) { doJump(); return; }
+  if (rectHit(controls.star.hit,x,y)) { activateBonus(); return; }
+}
+
+function toggleMusic(){
+  musicOn = !musicOn; playSfx('button');
+  if (!musicOn) ['main','bonus','high','gameover'].forEach(k=>SND[k].pause());
+  else if (state==='home'||state==='gameplay'||state==='paused') playMusic('main');
+}
+function toggleSound(){ soundOn=!soundOn; if (soundOn) playSfx('button'); }
+
+async function startFirstPlay(){
+  if (state !== 'home') return;
+
+  // This runs directly from Push-to-Start. Launch the spoken line FIRST while
+  // Safari still treats the code as part of the user's gesture.
+  state='intro';
+  introStep=1; intro3Popup=false; fadeAlpha=0;
+
+  let introHeyStarted = false;
+  if (soundOn) {
+    try { SND.introHey.load(); } catch {}
+    safePlay(SND.introHey, true);
+    introHeyStarted = true;
+  }
+
+  // Keep the home/main music underneath the intro, but duck it so the dialogue is clear.
+  if (musicOn) {
+    stopMusicExcept('main');
+    SND.main.volume=0.12;
+    playMusic('main', false);
+  }
+
+  await playIntro(introHeyStarted);
+  resetRun();
+  SND.main.volume=0.34;
+  state='gameplay';
+  if (musicOn) playMusic('main', false);
+}
+
+async function playIntro(introHeyStarted=false){
+  introStep=1; intro3Popup=false; fadeAlpha=0;
+  // If the voice was launched by the Start-button gesture, only wait for it here.
+  // Do not restart it or Safari may block/interfere with playback.
+  await waitAudio('introHey', 2900, !introHeyStarted); await wait(250);
+  if (state!=='intro') return;
+  introStep=2; playSfx('fridge'); await wait(1900);
+  if (state!=='intro') return;
+  introStep=3; if (soundOn) safePlay(SND.introLone); await wait(1000);
+  intro3Popup=true; await wait(1650);
+  if (state!=='intro') return;
+  introStep=4; intro3Popup=false;
+  // Hold Intro 04 on screen while the full shocked-reaction clip plays.
+  await wait(180);
+  await waitAudio('reaction', 3100);
+  await wait(500);
+  for (let i=0;i<=20;i++){ fadeAlpha=i/20; await wait(30); }
+  await wait(350);
+}
+
+function resetRun(){
+  playerLane=targetLane=0; playerX=W/2; jumping=false; jumpT=0; hurtT=0; invincible=0;
+  hearts=5; beers=0; coins=0; score=0; objects=[]; effects=[]; spawnClock=0.55; lastSafeLane=0; rowsSinceBeer=0;
+  speedMultiplier=1; powerReady=false; powerAnimating=false; bonusTime=0; bonusIntroElapsed=0; bonusIntroFade=1;
+  completedBonuses=0; postBonusSpawnPause=0; runTime=0;
+}
+function restartRun(){
+  stopMusicExcept('main'); resetRun(); state='gameplay'; SND.main.volume=0.34; if (musicOn) playMusic('main', true);
+}
+function pauseGame(){ previousState=state; state='paused'; SND.main.pause(); SND.bonus.pause(); }
+function moveLane(dir){
+  if (state!=='gameplay' && state!=='bonus') return;
+  targetLane = Math.max(-1, Math.min(1, targetLane + dir));
+  playSfx('lane');
+}
+function doJump(){
+  if ((state!=='gameplay' && state!=='bonus') || jumping) return;
+  jumping=true; jumpT=0; playSfx('jump');
+  addEffect('Effect_Jump.png', playerX, 1515, 0.46, 95, 235);
+  addEffect('Effect_Dust.png', playerX, 1535, 0.52, 90, 250);
+}
+
+function setBeerCount(v){
+  const old = beers; beers=Math.max(0,Math.min(12,v));
+  powerReady = beers===12;
+  if (beers===12 && old<12){ playSfx('twelve'); playSfx('powerReady'); powerAnimating=true; }
+  if (beers<12) powerAnimating=false;
+}
+
+async function activateBonus(){
+  if (state!=='gameplay' || !powerReady) return;
+
+  score += 500;
+  state='bonusIntro';
+  bonusIntroElapsed=0;
+  bonusIntroFade=1;
+
+  playSfx('powerActivate');
+  playSfx('bonusStart');
+  SND.main.pause();
+  stopMusicExcept('bonus');
+
+  // Friend 3 appears immediately with the spoken line.
+  await waitAudio('bonusVoice', 3400);
+  if (state!=='bonusIntro') return;
+
+  // The bonus music starts the instant the voice line ends—no extra delay.
+  if (musicOn) playMusic('bonus', true);
+
+  // Fade Friend 3, the popup, and the burst out together.
+  const fadeSteps=15;
+  for(let i=1;i<=fadeSteps;i++){
+    if (state!=='bonusIntro') return;
+    bonusIntroFade=1-(i/fadeSteps);
+    await wait(30);
+  }
+
+  // The playable Gold Rush gets its own full 10 seconds.
+  objects=[];
+  effects=[];
+  spawnClock=0;
+  bonusTime=10;
+  bonusIntroFade=1;
+  state='bonus';
+}
+
+function endBonus(){
+  bonusTime = 0;
+  stopAudio(SND.bonus);
+  objects = [];
+  effects = [];
+
+  // Reuse the bonus-start cue at half volume to signal that Gold Rush is over.
+  if (soundOn) {
+    const cue = SND.bonusStart;
+    const originalVolume = cue.volume;
+    cue.pause();
+    try { cue.currentTime = 0; } catch {}
+    cue.volume = 0.5;
+    const restore = () => {
+      cue.volume = originalVolume;
+      cue.removeEventListener('ended', restore);
+    };
+    cue.addEventListener('ended', restore, { once:true });
+    const p = cue.play();
+    if (p?.catch) p.catch(() => restore());
+  }
+
+  // Switch back to the normal background immediately with the ending cue.
+  state='gameplay';
+
+  // Bonus completion reward and reset.
+  hearts=5;
+  setBeerCount(0);
+  powerReady=false;
+  powerAnimating=false;
+  completedBonuses++;
+
+  // Preserve the existing difficulty increase after each completed bonus.
+  speedMultiplier *= 1.30;
+
+  // Give the player a clean two-second breather with no incoming rows.
+  postBonusSpawnPause=2;
+  spawnClock=0;
+
+  if (musicOn) {
+    stopMusicExcept('main');
+    playMusic('main', false);
+  }
+}
+
+function gameOver(){
+  if (state!=='gameplay') return;
+  state='ending'; SND.main.pause();
+  const isHigh = score > highScore;
+  if (isHigh) { highScore=score; localStorage.setItem('shaunLastBeerRunHighScore', String(highScore)); }
+  setTimeout(()=>{
+    if (isHigh){ state='highscore'; playSfx('highSfx'); stopMusicExcept('high'); if(musicOn) playMusic('high',true); }
+    else { state='gameover'; playSfx('gameoverSfx'); stopMusicExcept('gameover'); if(musicOn) playMusic('gameover',true); }
+  },450);
+}
+
+function chooseSafeLane(){
+  // A new required safe lane is never more than one lane away from the previous one,
+  // so the player always has enough time to make a valid lane change.
+  const options=[lastSafeLane];
+  if (lastSafeLane>-1) options.push(lastSafeLane-1);
+  if (lastSafeLane<1) options.push(lastSafeLane+1);
+  let next;
+  if (options.length>1 && Math.random()<0.68) {
+    const movers=options.filter(v=>v!==lastSafeLane);
+    next=movers[Math.floor(Math.random()*movers.length)];
+  } else next=lastSafeLane;
+  lastSafeLane=next;
+  return next;
+}
+
+function spawnRow(bonus=false){
+  const lanes=[-1,0,1];
+
+  if (bonus){
+    // Gold Rush: a dense burst of perspective coins scattered across the road.
+    // Fractional lane values keep every coin moving from the horizon toward the camera.
+    const count = 5 + Math.floor(Math.random()*4);
+    for(let i=0;i<count;i++){
+      objects.push({
+        type:'coin',
+        lane:-1.35 + Math.random()*2.70,
+        z:-0.10 + Math.random()*0.12,
+        hit:false,
+        img:'coin_collectible.png',
+        bonusCoin:true
+      });
+    }
+    return;
+  }
+
+  const safeLane=chooseSafeLane();
+  const blocked=lanes.filter(l=>l!==safeLane);
+  const roll=Math.random();
+
+  if (roll<0.28){
+    blocked.forEach(lane=>objects.push({
+      type:'obstacle',
+      lane,
+      z:0,
+      hit:false,
+      img:obstacleImages[Math.floor(Math.random()*obstacleImages.length)]
+    }));
+  } else if (roll<0.72){
+    const lane=blocked[Math.floor(Math.random()*blocked.length)];
+    objects.push({
+      type:'obstacle',
+      lane,
+      z:0,
+      hit:false,
+      img:obstacleImages[Math.floor(Math.random()*obstacleImages.length)]
+    });
+  }
+
+  rowsSinceBeer++;
+
+  // The first two levels/beer-meter cycles fill noticeably faster.
+  const earlyLevel = completedBonuses < 2;
+  const forceBeerAfter = earlyLevel ? 3 : 5;
+  const beerChance = earlyLevel ? 0.46 : 0.24;
+
+  const forceBeer = beers===11 || rowsSinceBeer>=forceBeerAfter;
+  const spawnBeer = beers<12 && (forceBeer || Math.random()<beerChance);
+
+  if (spawnBeer){
+    objects.push({
+      type:'beer',
+      lane:safeLane,
+      z:-0.015,
+      hit:false,
+      img:beers===11?'beer_finalbeer.png':'beer_collectible.png'
+    });
+    rowsSinceBeer=0;
+  } else {
+    objects.push({
+      type:'coin',
+      lane:safeLane,
+      z:-0.015,
+      hit:false,
+      img:'coin_collectible.png'
+    });
+  }
+}
+
+function addEffect(img,x,y,duration=0.45,startSize=90,endSize=220){
+  effects.push({img,x,y,age:0,duration,startSize,endSize});
+}
+
+function updateEffects(dt){
+  effects.forEach(f=>f.age+=dt);
+  effects=effects.filter(f=>f.age<f.duration);
+}
+
+function drawEffects(){
+  for(const f of effects){
+    const t=Math.max(0,Math.min(1,f.age/f.duration));
+    const size=f.startSize+(f.endSize-f.startSize)*t;
+    const alpha=1-t;
+    drawCentered(f.img,f.x,f.y,size,size,alpha);
+    if(f.img==='Effect_Hit.png'){
+      // Precise impact marker at the actual collision point.
+      ctx.save();
+      ctx.globalAlpha=alpha*.9;
+      ctx.strokeStyle='rgba(255,255,255,.95)';
+      ctx.lineWidth=8;
+      ctx.beginPath(); ctx.arc(f.x,f.y,28+42*t,0,Math.PI*2); ctx.stroke();
+      ctx.restore();
+    }
+  }
+}
+
+function perspective(o){
+  const z=Math.max(0,Math.min(1.08,o.z));
+  const t=Math.pow(z,1.65);
+  const y=horizonY+(groundY-horizonY)*t;
+  const spread=laneSpread*(0.18+0.82*z);
+  const x=W/2+o.lane*spread;
+  const scale=0.16+0.96*Math.pow(z,1.35);
+  return {x,y,scale,z};
+}
+
+function update(dt, realDt=dt){
+  if (state==='gameplay' || state==='bonus'){
+    runTime += dt;
+    playerX += ((W/2 + targetLane*laneSpread) - playerX) * Math.min(1, dt*10);
+    playerLane = Math.round((playerX-W/2)/laneSpread);
+    if (jumping){ jumpT += dt/0.82; if(jumpT>=1){jumpT=1;jumping=false;} }
+    if (hurtT>0) hurtT-=dt;
+    if (invincible>0) invincible-=dt;
+
+    if (state==='bonus'){
+      // Count bonus duration using real elapsed time, not the movement-frame clamp.
+      // This prevents the 10-second round from stretching by 2-3 seconds on slower phones.
+      bonusTime -= realDt;
+      if (bonusTime<=0){ endBonus(); return; }
+    }
+
+    const speed = baseSpeed * speedMultiplier * (state==='bonus'?1.05:1);
+
+    if (state==='gameplay' && postBonusSpawnPause>0) {
+      postBonusSpawnPause=Math.max(0,postBonusSpawnPause-realDt);
+    } else {
+      spawnClock -= dt*speed;
+      if (spawnClock<=0){
+        spawnRow(state==='bonus');
+        // Gold Rush bursts begin right away and arrive rapidly.
+        spawnClock = state==='bonus' ? 0.16 : 0.78;
+      }
+    }
+
+    objects.forEach(o=>{
+      o.z += dt * 0.31 * speed;
+      if (!o.hit && o.z>0.87 && o.z<1.04){
+        const p=perspective(o);
+        // Use the player's real horizontal position instead of a rounded lane.
+        // This makes a lane switch count as soon as the character has visibly moved clear.
+        const samePath=Math.abs(p.x-playerX)<118;
+        if(!samePath) return;
+        const jumpHeight = jumping ? Math.sin(Math.PI*jumpT) : 0;
+        if (o.type==='coin'){
+          o.hit=true; coins++;
+          // Bonus-round coins are worth double points.
+          score += state==='bonus' ? 20 : 10;
+          playSfx('coin');
+          if(state==='bonus'){
+            // Bigger, longer sparkle burst during bonus mode.
+            addEffect('Effect_CoinSparkle.png',p.x,p.y-65,0.62,105,300);
+            addEffect('Effect_StarSparkle.png',p.x,p.y-65,0.48,80,235);
+          } else {
+            addEffect('Effect_CoinSparkle.png',p.x,p.y-65,0.42,70,210);
+          }
+        } else if (o.type==='beer' && state==='gameplay'){
+          o.hit=true; setBeerCount(beers+1); playSfx('beer');
+          addEffect('Effect_BeerPickup.png',p.x,p.y-75,0.50,85,235);
+        } else if (o.type==='obstacle' && state==='gameplay' && invincible<=0){
+          // Jump visibly clears the obstacle when the player is sufficiently airborne.
+          if (jumpHeight>0.38){
+            o.hit=true; score+=2;
+            addEffect('Effect_Dust.png',p.x,p.y-15,0.38,65,190);
+          } else {
+            o.hit=true; invincible=1.25; hurtT=0.45; playSfx('obstacle');
+            addEffect('Effect_Hit.png',p.x,p.y-95,0.56,105,285);
+            hearts--;
+            playSfx('heartLost');
+            if (hearts<=0){ hearts=0; gameOver(); }
+          }
+        }
+      }
+    });
+    objects=objects.filter(o=>o.z<1.10 && !o.hit);
+    updateEffects(dt);
+  } else {
+    updateEffects(dt);
+  }
+  if (state==='bonusIntro') bonusIntroElapsed += dt;
+}
+
+function drawFull(name){ const im=IMG[name]; if(im?.complete) ctx.drawImage(im,0,0,W,H); else {ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);} }
+function drawCentered(name,cx,cy,w,h,alpha=1){ const im=IMG[name]; if(!im?.complete)return; ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(im,cx-w/2,cy-h/2,w,h);ctx.restore(); }
+function drawButton(name,c){ const s=c.draw; drawCentered(name,c.cx,c.cy,s,s,powerReady||name!=='button_power_star.png'?1:0.38); }
+function drawText(text,x,y,size=54,align='center'){ ctx.save();ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=`900 ${size}px system-ui,-apple-system,sans-serif`;ctx.lineWidth=10;ctx.strokeStyle='rgba(0,0,0,.75)';ctx.strokeText(text,x,y);ctx.fillStyle='#fff';ctx.fillText(text,x,y);ctx.restore(); }
+
+function drawHUD(){
+  // Five-heart health line.
+  for(let i=0;i<5;i++){
+    const name=i<hearts?'icon_heart_full.png':'icon_heart_empty.png';
+    drawCentered(name,62+i*66,82,58,58);
+  }
+  // 12-beer progress/power line.
+  const startX=112, gap=71, y=178;
+  for(let i=0;i<12;i++){
+    const name=i<beers?'icon_beer_full.png':'icon_beer_empty.png';
+    drawCentered(name,startX+i*gap,y,58,58);
+  }
+  drawCentered('icon_coin.png',790,80,64,64); drawText(String(coins),840,82,42,'left');
+  drawText(`SCORE ${score}`,W/2,80,42,'center');
+  drawCentered('button_pause.png',1000,85,115,115);
+}
+
+function drawGameplay(){
+  drawFull(state==='bonus'?'Screen_BonusRound.png':'Screen_Gameplay.png');
+
+  // Perspective objects: smallest near horizon, largest near player/camera.
+  const sorted=objects.slice().sort((a,b)=>a.z-b.z);
+  for(const o of sorted){
+    const p=perspective(o); const im=IMG[o.img]; if(!im?.complete)continue;
+    let base= o.type==='coin'?130 : o.type==='beer'?155 : 235;
+    const sz=base*p.scale;
+    const objectAlpha=Math.max(0,Math.min(1,(o.z+0.03)*5));
+
+    // During bonus mode, every approaching coin carries a pulsing sparkle halo.
+    if(state==='bonus' && o.type==='coin'){
+      const sparklePulse=1+0.16*Math.sin(performance.now()/130 + o.z*9 + o.lane*1.7);
+      drawCentered(
+        'Effect_CoinSparkle.png',
+        p.x,
+        p.y-sz/2,
+        sz*1.75*sparklePulse,
+        sz*1.75*sparklePulse,
+        objectAlpha*0.62
+      );
+    }
+
+    ctx.save(); ctx.globalAlpha=objectAlpha;
+    ctx.drawImage(im,p.x-sz/2,p.y-sz,sz,sz); ctx.restore();
+  }
+
+  const jumpHeight=jumping?Math.sin(Math.PI*jumpT):0;
+  const py=1510-jumpHeight*320;
+  let player='Player_Run_01.png';
+  if(jumping) player='Player_Jump.png'; else if(hurtT>0) player='Player_Hurt.png'; else player=['Player_Run_01.png','Player_Run_02.png','Player_Run_03.png'][Math.floor(runTime*9)%3];
+  if(invincible>0 && Math.floor(invincible*12)%2===0) ctx.globalAlpha=.45;
+  drawCentered(player,playerX,py,335,335); ctx.globalAlpha=1;
+  drawEffects();
+
+  drawHUD();
+  if(state==='bonus') drawText(`${Math.max(1,Math.ceil(bonusTime))}s`,W/2,285,74);
+
+  // Larger arrows at opposite lower corners; star/jump directly above them.
+  drawButton('button_move_left.png',controls.left);
+  drawButton('button_move_right.png',controls.right);
+  drawButton('button_power_star.png',controls.star);
+  drawButton('button_jump.png',controls.jump);
+
+  if(powerReady && state==='gameplay'){
+    const pulse=1+0.08*Math.sin(performance.now()/120);
+    const s=controls.star.draw*pulse;
+    drawCentered('Effect_StarSparkle.png',controls.star.cx,controls.star.cy,s*1.32,s*1.32,0.72);
+    drawCentered('button_power_star.png',controls.star.cx,controls.star.cy,s,s,1);
+  }
+}
+
+function render(){
+  ctx.clearRect(0,0,W,H);
+  if(state==='home'){
+    drawFull('Screen_Home.png');
+    drawCentered('Home_ThreeFriends_Group.png',W/2,1110,880,880);
+    drawCentered('Logo_ShaunMeccasLastBeerRun.png',W/2,410,900,450);
+    const pulse=1+0.04*Math.sin(performance.now()/220);
+    drawCentered('Popup_PushToStart.png',W/2,1510,720*pulse,360*pulse);
+    drawCentered('button_music.png',90,105,130,130,musicOn?1:.45);
+    drawCentered('button_sound.png',990,105,130,130,soundOn?1:.45);
+    drawCentered('Button_Rules.png',905,1710,250,250);
+  } else if(state==='rules'){
+    drawFull('Screen_Rules.png'); drawCentered('Button_Back.png',130,1750,220,220);
+  } else if(state==='intro'){
+    drawFull(`Intro_0${introStep}_${introStep===1?'Friend1_AskingForBeer':introStep===2?'Friend2_SearchingForBeer':introStep===3?'TheLoneStars':'Friend1_Shocked'}.png`);
+    if(introStep===3 && intro3Popup){
+      const p=1+0.08*Math.sin(performance.now()/105);
+      drawCentered('PopUp_TheLonestars.png',W/2,1040,850*p,425*p);
+    }
+    if(fadeAlpha>0){ctx.fillStyle=`rgba(0,0,0,${fadeAlpha})`;ctx.fillRect(0,0,W,H);}
+  } else if(state==='gameplay' || state==='bonus'){
+    drawGameplay();
+  } else if(state==='bonusTransition'){
+    drawFull('Screen_Gameplay.png'); drawHUD();
+    ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(0,0,W,H);
+  } else if(state==='bonusIntro'){
+    drawFull('Screen_BonusRound.png');
+    const t=Math.min(1,bonusIntroElapsed*4), bounce=1+0.06*Math.sin(bonusIntroElapsed*9);
+    const a=Math.max(0,Math.min(1,bonusIntroFade));
+    drawCentered('Effect_BonusBurst.png',W/2,1030,980*t*bounce,980*t*bounce,0.88*a);
+    drawCentered('Friend3_BonusRoundPose.png',W/2,1110,900*t*bounce,900*t*bounce,a);
+    drawCentered('Popup_DidSomeoneSayLoneStar.png',W/2,440,940*t,470*t,a);
+  } else if(state==='paused'){
+    drawFull('Screen_Pause.png'); drawCentered('Popup_Paused.png',W/2,640,760,380);
+    drawCentered('Button_Rules.png',170,1660,230,230); drawCentered('button_music.png',910,1660,230,230,musicOn?1:.45);
+  } else if(state==='highscore'){
+    drawFull('Screen_HighScore.png'); drawCentered('HighScore_ThreeFriends_Group.png',W/2,1060,900,900);
+    drawCentered('Popup_NewHighScore.png',W/2,330,900,450); drawCentered('Popup_WeDidIt.png',W/2,610,760,380);
+    drawText(`SCORE ${score}`,W/2,1320,58); drawText(`HIGH SCORE ${highScore}`,W/2,1400,48);
+    drawCentered('Popup_PlayAgain.png',W/2,1660,700,350);
+  } else if(state==='gameover'){
+    drawFull('Screen_GameOver.png'); drawCentered('GameOver_ThreeFriends_Group.png',W/2,1030,900,900);
+    drawCentered('Popup_GameOver.png',W/2,390,880,440);
+    drawText(`SCORE ${score}`,W/2,1320,58); drawText(`HIGH SCORE ${highScore}`,W/2,1400,48);
+    drawCentered('Popup_PlayAgain.png',W/2,1660,700,350);
+  } else if(state==='ending'){
+    drawFull('Screen_Gameplay.png'); ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(0,0,W,H);
+  }
+}
+
+function loop(now){
+  const realDt=Math.max(0,(now-last)/1000);
+  const dt=Math.min(0.033,realDt);
+  last=now;
+  update(dt,realDt);
+  render();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+function attemptHomeMusicAutoplay(){
+  if (!musicOn || state!=='home') return;
+  SND.main.loop = true;
+  SND.main.volume = 0.34;
+  safePlay(SND.main, false);
+}
+
+// Try immediately and again when the document becomes ready.
+// Audible autoplay is browser-controlled; if Safari blocks it, the first touch
+// anywhere on the game starts the same main loop through unlockAllAudio().
+attemptHomeMusicAutoplay();
+window.addEventListener('DOMContentLoaded', attemptHomeMusicAutoplay, { once:true });
+window.addEventListener('load', attemptHomeMusicAutoplay, { once:true });
+window.addEventListener('pageshow', attemptHomeMusicAutoplay);
+SND.main.addEventListener('canplay', attemptHomeMusicAutoplay, { once:true });
+SND.main.addEventListener('canplaythrough', attemptHomeMusicAutoplay, { once:true });
+
+// Pause if Safari/browser tabs away; resume only by player action.
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden && (state==='gameplay'||state==='bonus')){
+    previousState=state; state='paused'; SND.main.pause(); SND.bonus.pause();
+  }
+});
+})();
+</script>
+</body>
+</html>
