@@ -60,6 +60,16 @@
     }
   }
 
+  #nameGate { position:absolute; inset:0; z-index:30; display:grid; place-items:center; padding:24px; background:rgba(0,0,0,.84); backdrop-filter:blur(10px); touch-action:auto; }
+  #nameGate[hidden] { display:none; }
+  .name-card { width:min(460px,100%); padding:30px 26px; border:2px solid #ffc83d; border-radius:20px; text-align:center; background:linear-gradient(160deg,#28170d,#0c0909); box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 40px rgba(255,200,61,.18); font-family:Arial,sans-serif; }
+  .name-card .tag { color:#ffc83d; font-size:12px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
+  .name-card h2 { margin:8px 0 8px; color:#fff; font-size:clamp(28px,8vw,42px); line-height:.95; text-transform:uppercase; }
+  .name-card p { margin:0 0 18px; color:#d8cfc5; font-size:15px; }
+  .name-card input { width:100%; height:54px; padding:0 14px; border:1px solid rgba(255,255,255,.25); border-radius:10px; background:#080606; color:#fff; text-align:center; text-transform:uppercase; font:800 18px Arial,sans-serif; user-select:text; -webkit-user-select:text; touch-action:auto; }
+  .name-card button { width:100%; height:52px; margin-top:10px; border:0; border-radius:10px; background:linear-gradient(135deg,#ffc83d,#ff692e); color:#1b0d05; font:900 15px Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; touch-action:auto; }
+  #nameError { min-height:18px; margin:8px 0 0; color:#ff9b82; font:700 12px Arial,sans-serif; }
+
   @media (prefers-reduced-motion: reduce) {
     body::before { animation: none; }
   }
@@ -68,6 +78,16 @@
 <body>
 <div id="wrap"><canvas id="game" width="1080" height="1920" aria-label="Shaun Mecca's Last Beer Run"></canvas></div>
 <div id="rotate">Turn your phone upright to play.</div>
+<div id="nameGate" hidden>
+  <div class="name-card" role="dialog" aria-modal="true" aria-labelledby="nameGateTitle">
+    <div class="tag">Global leaderboard</div>
+    <h2 id="nameGateTitle">Choose your player name</h2>
+    <p>This is the name fans will see beside your best score.</p>
+    <input id="playerNameInput" maxlength="18" autocomplete="nickname" placeholder="ENTER YOUR NAME" aria-label="Leaderboard player name">
+    <button id="savePlayerName" type="button">Save name &amp; start</button>
+    <div id="nameError" aria-live="polite"></div>
+  </div>
+</div>
 <script>
 (() => {
 'use strict';
@@ -75,6 +95,10 @@
 const W = 1080, H = 1920;
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d', { alpha: false });
+const nameGate = document.getElementById('nameGate');
+const playerNameInput = document.getElementById('playerNameInput');
+const savePlayerName = document.getElementById('savePlayerName');
+const nameError = document.getElementById('nameError');
 ctx.imageSmoothingEnabled = true;
 
 // Prevent iPhone Safari pinch/double-tap zoom while playing.
@@ -207,6 +231,7 @@ const GAME_ID = 'shaun-mecca';
 let globalScores = [];
 let leaderboardStatus = 'Loading online scores...';
 let scoreSubmittedForRun = false;
+let submissionMessage = '';
 
 function getLeaderboardPlayer(){
   let id = localStorage.getItem('marzBarzPlayerId');
@@ -235,10 +260,40 @@ async function loadGlobalScores(){
   }
 }
 
+function needsPlayerName(){
+  const saved = (localStorage.getItem('marzBarzPlayerName') || '').trim();
+  const looksGenerated = /^PLAYER [A-Z0-9]{4}$/.test(saved.toUpperCase());
+  return !saved || looksGenerated;
+}
+
+function showPlayerNameGate(){
+  const saved = localStorage.getItem('marzBarzPlayerName') || '';
+  playerNameInput.value = /^PLAYER [A-Z0-9]{4}$/.test(saved.toUpperCase()) ? '' : saved;
+  nameError.textContent = '';
+  nameGate.hidden = false;
+  setTimeout(() => playerNameInput.focus(), 0);
+}
+
+function confirmPlayerName(){
+  const clean = playerNameInput.value.replace(/[^a-z0-9 _-]/gi, '').trim().slice(0, 18).toUpperCase();
+  if (clean.length < 2) { nameError.textContent = 'ENTER AT LEAST 2 CHARACTERS'; return; }
+  localStorage.setItem('marzBarzPlayerName', clean);
+  localStorage.setItem('marzBarzPlayerNameConfirmed', '1');
+  playerNameInput.value = clean;
+  nameGate.hidden = true;
+  startFirstPlay();
+}
+
+savePlayerName.addEventListener('click', confirmPlayerName);
+playerNameInput.addEventListener('keydown', event => {
+  if (event.key === 'Enter') { event.preventDefault(); confirmPlayerName(); }
+});
+
 async function submitGlobalScore(finalScore){
   if (scoreSubmittedForRun || !Number.isFinite(finalScore) || finalScore < 0) return;
   scoreSubmittedForRun = true;
   leaderboardStatus = 'SAVING SCORE...';
+  submissionMessage = 'SUBMITTING SCORE...';
   try {
     const player = getLeaderboardPlayer();
     const response = await fetch('/api/scores/' + GAME_ID, {
@@ -251,8 +306,10 @@ async function submitGlobalScore(finalScore){
     globalScores = Array.isArray(data.scores) ? data.scores.slice(0, 5) : globalScores;
     if (globalScores[0]) highScore = Math.max(highScore, Number(globalScores[0].score) || 0);
     leaderboardStatus = '';
+    submissionMessage = 'SCORE SUBMITTED!';
   } catch (error) {
     leaderboardStatus = 'SCORE SAVED ON THIS DEVICE';
+    submissionMessage = 'SAVED ON THIS DEVICE';
   }
 }
 
@@ -331,6 +388,7 @@ function toggleSound(){ soundOn=!soundOn; if (soundOn) playSfx('button'); }
 
 async function startFirstPlay(){
   if (state !== 'home') return;
+  if (needsPlayerName()) { showPlayerNameGate(); return; }
 
   // This runs directly from Push-to-Start. Launch the spoken line FIRST while
   // Safari still treats the code as part of the user's gesture.
@@ -380,7 +438,7 @@ async function playIntro(introHeyStarted=false){
 
 function resetRun(){
   playerLane=targetLane=0; playerX=W/2; jumping=false; jumpT=0; hurtT=0; invincible=0;
-  hearts=5; beers=0; coins=0; score=0; objects=[]; effects=[]; spawnClock=0.55; lastSafeLane=0; rowsSinceBeer=0; scoreSubmittedForRun=false;
+  hearts=5; beers=0; coins=0; score=0; objects=[]; effects=[]; spawnClock=0.55; lastSafeLane=0; rowsSinceBeer=0; scoreSubmittedForRun=false; submissionMessage='';
   speedMultiplier=1; powerReady=false; powerAnimating=false; bonusTime=0; bonusIntroElapsed=0; bonusIntroFade=1;
   completedBonuses=0; postBonusSpawnPause=0; runTime=0;
 }
@@ -845,6 +903,11 @@ function drawOnlineLeaderboard(startY){
       const player = String(entry.playerName || 'PLAYER').slice(0, 16).toUpperCase();
       ctx.fillText((index + 1) + '. ' + player + '  ' + Number(entry.score || 0), W/2, startY + 48 + index * 35);
     });
+  }
+  if (submissionMessage) {
+    ctx.fillStyle = submissionMessage === 'SCORE SUBMITTED!' ? '#75ff8a' : '#ffd84a';
+    ctx.font = 'bold 30px Arial';
+    ctx.fillText(submissionMessage, W/2, startY + 235);
   }
   ctx.restore();
 }
