@@ -1,0 +1,8 @@
+name = "marzbarzgamelab"
+compatibility_date = "2026-07-29"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "marzbarz-high-scores"
+database_id = "e66876f6-86da-4dda-8a8d-779f2fa5f03c"
