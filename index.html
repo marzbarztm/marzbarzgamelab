@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#03030a">
-  <meta name="description" content="MarzBarz Game Lab — play an original arcade intro and enter the world of Shaun Mecca.">
+  <meta name="description" content="Marz Barz Game Lab turns individual people, personalities, and brands into nostalgic games with a modern twist.">
   <title>MarzBarz Game Lab</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -519,6 +519,39 @@
       border-color: var(--magenta);
     }
 
+    .ticker {
+      position: relative;
+      overflow: hidden;
+      border-block: 1px solid rgba(32, 244, 255, .55);
+      color: var(--black);
+      background: var(--cyan);
+      font-family: var(--display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .ticker-track {
+      display: flex;
+      width: max-content;
+      padding: 15px 0;
+      animation: ticker-scroll 24s linear infinite;
+    }
+
+    .ticker-track span {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .ticker-track span::after {
+      content: "✦";
+      padding: 0 36px;
+      color: var(--magenta);
+    }
+
     .section {
       padding: clamp(82px, 10vw, 138px) 0;
     }
@@ -745,10 +778,15 @@
     .footer-inner {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       gap: 24px;
-      color: var(--muted);
-      font-size: 13px;
+      color: var(--cyan);
+      font-family: var(--display);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-align: center;
+      text-transform: uppercase;
     }
 
     .footer-inner strong {
@@ -760,6 +798,10 @@
     @keyframes logo-in {
       from { opacity: 0; transform: scale(.985); }
       to { opacity: 1; transform: none; }
+    }
+
+    @keyframes ticker-scroll {
+      to { transform: translateX(-50%); }
     }
 
     @media (max-width: 900px) {
@@ -917,8 +959,7 @@
       }
 
       .footer-inner {
-        align-items: flex-start;
-        flex-direction: column;
+        justify-content: center;
       }
     }
 
@@ -934,6 +975,10 @@
         animation-iteration-count: 1 !important;
         transition-duration: .01ms !important;
       }
+
+      .ticker-track {
+        animation: none;
+      }
     }
   </style>
 </head>
@@ -948,8 +993,8 @@
       </a>
       <div class="nav-links">
         <a href="#arcade">Play</a>
-        <a href="#level-select">Level select</a>
-        <a href="#world">World</a>
+        <a href="#shaun">Shaun Mecca</a>
+        <a href="#approach">Your story</a>
       </div>
     </nav>
   </header>
@@ -959,15 +1004,15 @@
       <div class="wrap">
         <div class="hero-heading">
           <div>
-            <div class="eyebrow">Playable homepage</div>
-            <h1>Enter the <span>Game Lab.</span></h1>
+            <div class="eyebrow">Individuality in play</div>
+            <h1>Your identity. <span>Made playable.</span></h1>
           </div>
-          <p class="hero-copy">Move, jump, collect energy, and open the portal. This is the lobby—Shaun Mecca is the first full game.</p>
+          <p class="hero-copy">We turn people, personalities, and brands into nostalgic game experiences with a polished modern twist.</p>
         </div>
 
         <div class="arcade-cabinet">
           <div class="game-screen">
-            <canvas id="portalGame" width="960" height="540" tabindex="0" aria-label="MarzBarz Portal Run. Use arrow keys or A and D to move, and Space or W to jump. Collect eight energy orbs and avoid obstacles."></canvas>
+            <canvas id="portalGame" width="960" height="540" tabindex="0" aria-label="Marz Barz Portal Run. Use arrow keys or A and D to move, and Space or W to jump. Collect eight energy orbs and avoid obstacles."></canvas>
 
             <div class="screen-status" aria-hidden="true"><i></i> Arcade lobby</div>
 
@@ -981,7 +1026,7 @@
               <div class="intro-copy">
                 <div class="eyebrow">Arcade lobby</div>
                 <h2>Portal <span>Run</span></h2>
-                <p>Collect eight energy orbs, dodge the blocks, and unlock the gateway to World 001.</p>
+                <p>Collect eight energy orbs, dodge the blocks, and unlock the gateway to Shaun Mecca.</p>
                 <div class="intro-actions">
                   <button class="game-button" type="button" id="startGame">Start game</button>
                   <a class="game-button alt" href="games/shaun-mecca/" target="_blank" rel="noopener noreferrer">Skip to Shaun</a>
@@ -997,7 +1042,7 @@
               <span><b>Goal</b> Collect 8 energy</span>
             </div>
             <div class="toolbar-actions">
-              <a class="icon-button portal-link" id="portalLaunch" href="games/shaun-mecca/" target="_blank" rel="noopener noreferrer">Enter world</a>
+              <a class="icon-button portal-link" id="portalLaunch" href="games/shaun-mecca/" target="_blank" rel="noopener noreferrer">Play Shaun</a>
               <button class="icon-button" type="button" id="pauseGame">Pause</button>
               <button class="icon-button" type="button" id="restartGame">Restart</button>
             </div>
@@ -1013,27 +1058,33 @@
       </div>
     </section>
 
-    <section class="section alt" id="level-select">
-      <div class="wrap">
-        <div class="section-heading">
-          <div>
-            <div class="eyebrow">Level select</div>
-            <h2>World 001: <span>Shaun Mecca</span></h2>
-          </div>
-          <span class="level-label">Playable now</span>
-        </div>
+    <div class="ticker" aria-label="Marz Barz Game Lab philosophy">
+      <div class="ticker-track">
+        <span>Your story</span>
+        <span>Your style</span>
+        <span>Your game</span>
+        <span>Nostalgia reimagined</span>
+        <span>Personality made playable</span>
+        <span aria-hidden="true">Your story</span>
+        <span aria-hidden="true">Your style</span>
+        <span aria-hidden="true">Your game</span>
+        <span aria-hidden="true">Nostalgia reimagined</span>
+        <span aria-hidden="true">Personality made playable</span>
+      </div>
+    </div>
 
+    <section class="section alt" id="shaun">
+      <div class="wrap">
         <article class="level-card">
           <div class="level-preview">
             <video muted loop autoplay playsinline controls preload="metadata" aria-label="Shaun Mecca game preview">
               <source src="shaunmecca.mp4" type="video/mp4">
             </video>
-            <span class="preview-tag">Gameplay preview</span>
           </div>
           <div class="level-copy">
-            <div class="eyebrow">Featured game</div>
+            <div class="eyebrow">Meet Shaun Mecca</div>
             <h3>Last <span>Beer Run</span></h3>
-            <p>Dodge the chaos, collect the goods, and help Shaun survive one very strange run through town.</p>
+            <p>Shaun’s personality, humor, and signature style became a game made specifically around him. Dodge the chaos, collect the goods, and survive one very strange run through town.</p>
             <div class="stats" aria-label="Game details">
               <div class="stat"><b>Arcade</b><span>Genre</span></div>
               <div class="stat"><b>1 Player</b><span>Mode</span></div>
@@ -1045,31 +1096,31 @@
       </div>
     </section>
 
-    <section class="section" id="world">
+    <section class="section" id="approach">
       <div class="wrap">
         <div class="section-heading">
           <div>
-            <div class="eyebrow">About this world</div>
-            <h2>Built like a <span>game.</span></h2>
+            <div class="eyebrow">For people who stand out</div>
+            <h2>Your identity. <span>Your game.</span></h2>
           </div>
-          <span class="level-label">MarzBarz rules</span>
+          <span class="level-label">Nostalgia, reimagined</span>
         </div>
 
         <div class="world-grid">
           <article class="world-card">
             <span class="world-number">01</span>
-            <h3>Play first</h3>
-            <p>The homepage is an arcade lobby you can actually control, not a poster pretending to be a game.</p>
+            <h3>Start with you</h3>
+            <p>Your personality, story, inside jokes, and recognizable details become the creative foundation.</p>
           </article>
           <article class="world-card">
             <span class="world-number">02</span>
-            <h3>Original worlds</h3>
-            <p>Every character, mechanic, and strange little detail belongs to the MarzBarz universe.</p>
+            <h3>Nostalgia with intent</h3>
+            <p>Familiar arcade energy creates an instant emotional connection without turning your brand into a costume.</p>
           </article>
           <article class="world-card">
             <span class="world-number">03</span>
-            <h3>One more try</h3>
-            <p>Fast feedback, simple controls, and enough surprise to make another run feel irresistible.</p>
+            <h3>Modern by design</h3>
+            <p>Responsive, polished, accessible, and made to share—retro inspiration built for how people play today.</p>
           </article>
         </div>
       </div>
@@ -1078,9 +1129,7 @@
 
   <footer>
     <div class="wrap footer-inner">
-      <strong>MarzBarz Game Lab</strong>
-      <span>© 2026 MarzBarz Game Lab</span>
-      <span>Original games, built independently</span>
+      <strong>MARZ BARZ GAME LAB</strong>
     </div>
   </footer>
 
@@ -1321,7 +1370,7 @@
           state = "won";
           score += 1000;
           portalLaunch.classList.add("ready");
-          announcement.textContent = "Portal reached. Enter World 001 when ready.";
+          announcement.textContent = "Portal reached. Shaun Mecca is ready.";
         }
 
         score += 1;
@@ -1474,7 +1523,7 @@
           ctx.fillStyle = "rgba(3,3,10,.76)";
           ctx.fillRect(0, 0, W, H);
           drawPixelText("PORTAL REACHED", W / 2, 190, 50, palette.magenta, "center");
-          drawPixelText("SELECT ENTER WORLD BELOW", W / 2, 264, 21, palette.white, "center");
+          drawPixelText("SELECT PLAY SHAUN BELOW", W / 2, 264, 21, palette.white, "center");
         } else if (state === "gameover") {
           ctx.fillStyle = "rgba(3,3,10,.8)";
           ctx.fillRect(0, 0, W, H);
@@ -1485,7 +1534,7 @@
           ctx.fillRect(0, 0, W, H);
           drawPixelText("PAUSED", W / 2, 222, 54, palette.cyan, "center");
         } else if (energy >= 8) {
-          drawPixelText("GATEWAY OPEN — WORLD 001 READY", W / 2, 90, 20, palette.magenta, "center");
+          drawPixelText("GATEWAY OPEN — SHAUN IS READY", W / 2, 90, 20, palette.magenta, "center");
         }
       }
 
