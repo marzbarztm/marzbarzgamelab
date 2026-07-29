@@ -145,12 +145,12 @@
       width: 22px;
       height: 22px;
       flex: 0 0 auto;
-      background: linear-gradient(135deg, var(--cyan) 0 49%, var(--magenta) 50%);
+      background: linear-gradient(135deg, var(--blue) 0 49%, var(--purple) 50%);
       clip-path: polygon(0 34%, 34% 34%, 34% 0, 66% 0, 66% 34%, 100% 34%, 100% 66%, 66% 66%, 66% 100%, 34% 100%, 34% 66%, 0 66%);
     }
 
     .brand em {
-      color: var(--magenta);
+      color: var(--purple);
       font-style: normal;
     }
 
@@ -227,7 +227,7 @@
     }
 
     h1 span {
-      color: var(--magenta);
+      color: var(--purple);
     }
 
     .hero-copy {
@@ -264,7 +264,7 @@
     .arcade-cabinet::after {
       right: 52px;
       bottom: 0;
-      background: var(--magenta);
+      background: var(--purple);
     }
 
     .game-screen {
@@ -352,7 +352,7 @@
     }
 
     .intro-copy h2 span {
-      color: var(--magenta);
+      color: var(--purple);
     }
 
     .intro-copy p {
@@ -398,7 +398,7 @@
 
     .game-button:hover,
     .game-button:focus-visible {
-      background: var(--magenta);
+      background: var(--purple);
       transform: translateY(-2px);
     }
 
@@ -485,8 +485,8 @@
       align-items: center;
       justify-content: center;
       color: var(--black);
-      background: var(--magenta);
-      border-color: var(--magenta);
+      background: var(--purple);
+      border-color: var(--purple);
       text-decoration: none;
     }
 
@@ -514,9 +514,9 @@
     }
 
     .touch-button.jump {
-      color: var(--black);
-      background: var(--magenta);
-      border-color: var(--magenta);
+      color: var(--white);
+      background: var(--purple);
+      border-color: var(--purple);
     }
 
     .ticker {
@@ -582,7 +582,7 @@
     }
 
     .section-heading h2 span {
-      color: var(--magenta);
+      color: var(--purple);
     }
 
     .level-label {
@@ -671,42 +671,12 @@
     }
 
     .level-copy h3 span {
-      color: var(--magenta);
+      color: var(--purple);
     }
 
     .level-copy p {
       margin-bottom: 24px;
       color: var(--muted);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 28px;
-    }
-
-    .stat {
-      padding: 12px 10px;
-      background: rgba(21, 89, 255, .1);
-      border: 1px solid rgba(32, 244, 255, .18);
-    }
-
-    .stat b,
-    .stat span {
-      display: block;
-    }
-
-    .stat b {
-      color: var(--white);
-      font-family: var(--display);
-      font-size: 14px;
-    }
-
-    .stat span {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
     }
 
     .world-grid {
@@ -737,7 +707,7 @@
       opacity: .22;
       background:
         linear-gradient(90deg, var(--cyan) 8px, transparent 8px 16px),
-        linear-gradient(var(--magenta) 8px, transparent 8px 16px);
+        linear-gradient(var(--purple) 8px, transparent 8px 16px);
       background-size: 16px 16px;
       transform: rotate(12deg);
     }
@@ -760,7 +730,8 @@
     }
 
     .world-card:nth-child(3) .world-number {
-      background: var(--magenta);
+      color: var(--white);
+      background: var(--blue);
     }
 
     .world-card h3 {
@@ -955,10 +926,6 @@
         padding: 14px 6px 20px;
       }
 
-      .stats {
-        grid-template-columns: 1fr;
-      }
-
       .footer-inner {
         justify-content: center;
       }
@@ -1085,12 +1052,7 @@
           <div class="level-copy">
             <div class="eyebrow">Meet Shaun Mecca</div>
             <h3>Last <span>Beer Run</span></h3>
-            <p>Shaun’s personality, humor, and signature style became a game made specifically around him. Dodge the chaos, collect the goods, and survive one very strange run through town.</p>
-            <div class="stats" aria-label="Game details">
-              <div class="stat"><b>Arcade</b><span>Genre</span></div>
-              <div class="stat"><b>1 Player</b><span>Mode</span></div>
-              <div class="stat"><b>Playable</b><span>Status</span></div>
-            </div>
+            <p>The fridge is empty. The party isn’t over. Shaun’s got one last run to make.</p>
             <a class="game-button" href="games/shaun-mecca/" target="_blank" rel="noopener noreferrer">Play full game</a>
           </div>
         </article>
@@ -1190,7 +1152,7 @@
         x: (i * 127) % W,
         y: (i * 71) % 300,
         size: i % 11 === 0 ? 2 : 1,
-        color: i % 3 === 0 ? palette.cyan : i % 3 === 1 ? palette.blue : palette.magenta
+        color: i % 3 === 0 ? palette.cyan : i % 3 === 1 ? palette.blue : palette.purple
       }));
 
       const buildings = Array.from({ length: 18 }, (_, i) => ({
@@ -1338,7 +1300,7 @@
           if (intersects(player, hitbox)) {
             energy = Math.min(8, energy + 1);
             score += 120;
-            createBurst(item.x, item.y, energy === 8 ? palette.magenta : palette.cyan, 16);
+            createBurst(item.x, item.y, energy === 8 ? palette.purple : palette.cyan, 16);
             if (energy === 8) portalLaunch.classList.add("ready");
             announcement.textContent = energy === 8 ? "Portal unlocked." : `Energy ${energy} of 8 collected.`;
             return false;
@@ -1437,7 +1399,7 @@
         ctx.fillRect(0, groundY, W, H - groundY);
         ctx.fillStyle = palette.cyan;
         ctx.fillRect(0, groundY, W, 3);
-        ctx.fillStyle = palette.magenta;
+        ctx.fillStyle = palette.purple;
         for (let x = -(frame * speed) % 64; x < W; x += 64) {
           ctx.fillRect(x, groundY + 22, 32, 5);
         }
@@ -1452,7 +1414,7 @@
         ctx.fillStyle = palette.cyan;
         ctx.fillRect(x + 11, y, 12, 8);
         ctx.fillRect(x + 2, y + 15, 8, 12);
-        ctx.fillStyle = palette.magenta;
+        ctx.fillStyle = palette.purple;
         ctx.fillRect(x + 24, y + 15, 8, 12);
         ctx.fillStyle = palette.white;
         ctx.fillRect(x + 13, y + 9, 4, 4);
@@ -1467,7 +1429,7 @@
           const size = item.size;
           const x = Math.round(item.x);
           const y = Math.round(item.y);
-          ctx.fillStyle = energy >= 7 ? palette.magenta : palette.cyan;
+          ctx.fillStyle = energy >= 7 ? palette.purple : palette.cyan;
           ctx.fillRect(x + 5, y, size - 10, size);
           ctx.fillRect(x, y + 5, size, size - 10);
           ctx.fillStyle = palette.white;
@@ -1510,20 +1472,20 @@
         ctx.strokeRect(x + 8, y + 8, 50, 138);
         ctx.fillStyle = "rgba(32,244,255,.11)";
         ctx.fillRect(x + 10, y + 10, 46, 134);
-        drawPixelText("PORTAL", x + 33, y - 30, 15, palette.magenta, "center");
+        drawPixelText("PORTAL", x + 33, y - 30, 15, palette.purple, "center");
       }
 
       function drawHud() {
         ctx.fillStyle = "rgba(3,3,10,.72)";
         ctx.fillRect(18, 18, 330, 54);
         drawPixelText(`SCORE ${String(score).padStart(6, "0")}`, 34, 29, 18, palette.white);
-        drawPixelText(`ENERGY ${energy}/8`, 204, 29, 18, energy >= 8 ? palette.magenta : palette.cyan);
+        drawPixelText(`ENERGY ${energy}/8`, 204, 29, 18, energy >= 8 ? palette.purple : palette.cyan);
         drawPixelText(`LIVES ${"◆".repeat(Math.max(0, lives))}`, W - 28, 29, 18, palette.white, "right");
 
         if (state === "won") {
           ctx.fillStyle = "rgba(3,3,10,.76)";
           ctx.fillRect(0, 0, W, H);
-          drawPixelText("PORTAL REACHED", W / 2, 190, 50, palette.magenta, "center");
+          drawPixelText("PORTAL REACHED", W / 2, 190, 50, palette.purple, "center");
           drawPixelText("SELECT PLAY SHAUN BELOW", W / 2, 264, 21, palette.white, "center");
         } else if (state === "gameover") {
           ctx.fillStyle = "rgba(3,3,10,.8)";
@@ -1535,7 +1497,7 @@
           ctx.fillRect(0, 0, W, H);
           drawPixelText("PAUSED", W / 2, 222, 54, palette.cyan, "center");
         } else if (energy >= 8) {
-          drawPixelText("GATEWAY OPEN — SHAUN IS READY", W / 2, 90, 20, palette.magenta, "center");
+          drawPixelText("GATEWAY OPEN — SHAUN IS READY", W / 2, 90, 20, palette.purple, "center");
         }
       }
 
