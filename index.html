@@ -36,17 +36,37 @@
     }
 
     body {
+      position: relative;
+      isolation: isolate;
       margin: 0;
       min-width: 320px;
       overflow-x: hidden;
       color: var(--white);
       background:
-        radial-gradient(circle at 15% 8%, rgba(21, 89, 255, .15), transparent 28rem),
-        radial-gradient(circle at 85% 25%, rgba(255, 43, 214, .1), transparent 30rem),
+        radial-gradient(circle at 15% 8%, rgba(21, 89, 255, .18), transparent 28rem),
+        radial-gradient(circle at 85% 25%, rgba(122, 44, 255, .14), transparent 30rem),
         var(--black);
       font-family: var(--body);
       font-size: 17px;
       line-height: 1.65;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -12%;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .32;
+      background:
+        radial-gradient(circle, rgba(32, 244, 255, .78) 0 2px, transparent 3px) 0 0 / 96px 96px,
+        radial-gradient(circle, rgba(122, 44, 255, .72) 0 2px, transparent 3px) 38px 28px / 128px 128px,
+        repeating-linear-gradient(90deg, rgba(21, 89, 255, .2) 0 1px, transparent 1px 64px),
+        repeating-linear-gradient(0deg, rgba(122, 44, 255, .18) 0 1px, transparent 1px 64px);
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, .18), #000 38%, #000 86%, rgba(0, 0, 0, .38));
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, .18), #000 38%, #000 86%, rgba(0, 0, 0, .38));
+      animation: arcade-pattern-drift 18s linear infinite;
+      will-change: background-position;
     }
 
     body::after {
@@ -175,7 +195,7 @@
       color: var(--cyan);
     }
 
-    .game-hero {
+    .brand-hero {
       padding: clamp(42px, 6vw, 76px) 0 82px;
     }
 
@@ -237,84 +257,17 @@
       font-size: 16px;
     }
 
-    .arcade-cabinet {
+    .hero-logo {
       position: relative;
-      padding: 10px;
-      border: 1px solid rgba(32, 244, 255, .46);
-      background: var(--panel);
-      clip-path: polygon(0 14px, 14px 14px, 14px 0, calc(100% - 14px) 0, calc(100% - 14px) 14px, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 14px calc(100% - 14px), 0 calc(100% - 14px));
-    }
-
-    .arcade-cabinet::before,
-    .arcade-cabinet::after {
-      content: "";
-      position: absolute;
-      z-index: 4;
-      width: 64px;
-      height: 5px;
-      pointer-events: none;
-    }
-
-    .arcade-cabinet::before {
-      top: 0;
-      left: 52px;
-      background: var(--cyan);
-    }
-
-    .arcade-cabinet::after {
-      right: 52px;
-      bottom: 0;
-      background: var(--purple);
-    }
-
-    .game-screen {
-      position: relative;
-      aspect-ratio: 16 / 9;
-      overflow: hidden;
-      background: #020207;
-      border: 1px solid rgba(122, 44, 255, .44);
-    }
-
-    #portalGame {
-      width: 100%;
-      height: 100%;
-      display: block;
-      background: #020207;
-      image-rendering: pixelated;
-    }
-
-    .game-intro {
-      position: absolute;
-      inset: 0;
-      z-index: 8;
-      display: grid;
-      grid-template-columns: minmax(140px, 280px) minmax(240px, 420px);
-      align-items: center;
-      justify-content: center;
-      gap: clamp(26px, 6vw, 84px);
-      padding: clamp(22px, 5vw, 62px);
-      background:
-        linear-gradient(rgba(3, 3, 10, .78), rgba(3, 3, 10, .95)),
-        linear-gradient(90deg, rgba(21, 89, 255, .22), rgba(255, 43, 214, .16));
-      transition: opacity .35s ease, visibility .35s ease;
-    }
-
-    .game-intro.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .intro-logo {
-      position: relative;
+      width: min(70vw, 680px);
       aspect-ratio: 1;
+      margin: 0 auto clamp(30px, 4vw, 54px);
       overflow: hidden;
       background: #000;
-      border: 1px solid rgba(32, 244, 255, .5);
     }
 
-    .intro-logo video,
-    .intro-logo img {
+    .hero-logo video,
+    .hero-logo img {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -322,58 +275,23 @@
       background: #000;
     }
 
-    .intro-logo video {
+    .hero-logo video {
       z-index: 2;
       object-fit: cover;
     }
 
-    .intro-logo img {
+    .hero-logo img {
       z-index: 1;
       object-fit: contain;
     }
 
-    .intro-logo.reveal img {
+    .hero-logo.reveal img {
       z-index: 3;
       animation: logo-in .24s ease both;
     }
 
-    .intro-logo.reveal video {
+    .hero-logo.reveal video {
       opacity: 0;
-    }
-
-    .intro-copy h2 {
-      margin-bottom: 14px;
-      font-family: var(--display);
-      font-size: clamp(28px, 4vw, 54px);
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: -.03em;
-      text-transform: uppercase;
-    }
-
-    .intro-copy h2 span {
-      color: var(--purple);
-    }
-
-    .intro-copy p {
-      max-width: 410px;
-      margin-bottom: 24px;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .intro-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      opacity: .35;
-      pointer-events: none;
-      transition: opacity .2s ease;
-    }
-
-    .game-intro.ready .intro-actions {
-      opacity: 1;
-      pointer-events: auto;
     }
 
     .game-button {
@@ -400,123 +318,6 @@
     .game-button:focus-visible {
       background: var(--purple);
       transform: translateY(-2px);
-    }
-
-    .game-button.alt {
-      color: var(--white);
-      background: rgba(122, 44, 255, .28);
-      border: 1px solid rgba(245, 251, 255, .34);
-    }
-
-    .screen-status {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      z-index: 7;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 10px;
-      color: var(--white);
-      background: rgba(3, 3, 10, .72);
-      border: 1px solid rgba(32, 244, 255, .35);
-      font-family: var(--display);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-
-    .screen-status i {
-      width: 7px;
-      height: 7px;
-      background: var(--cyan);
-    }
-
-    .game-toolbar {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: center;
-      gap: 22px;
-      padding: 15px 8px 5px;
-    }
-
-    .instructions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 22px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .instructions b {
-      color: var(--white);
-      font-family: var(--display);
-    }
-
-    .toolbar-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .icon-button {
-      min-width: 88px;
-      min-height: 38px;
-      padding: 0 12px;
-      color: var(--white);
-      background: transparent;
-      border: 1px solid rgba(245, 251, 255, .25);
-      font-family: var(--display);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-
-    .icon-button:hover,
-    .icon-button:focus-visible {
-      color: var(--cyan);
-      border-color: var(--cyan);
-    }
-
-    .portal-link {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      color: var(--black);
-      background: var(--purple);
-      border-color: var(--purple);
-      text-decoration: none;
-    }
-
-    .portal-link.ready {
-      display: inline-flex;
-    }
-
-    .touch-controls {
-      display: none;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .touch-button {
-      min-height: 48px;
-      color: var(--white);
-      background: rgba(21, 89, 255, .16);
-      border: 1px solid rgba(32, 244, 255, .35);
-      font-family: var(--display);
-      font-size: 14px;
-      font-weight: 700;
-      user-select: none;
-      touch-action: manipulation;
-    }
-
-    .touch-button.jump {
-      color: var(--white);
-      background: var(--purple);
-      border-color: var(--purple);
     }
 
     .ticker {
@@ -773,6 +574,12 @@
       text-transform: uppercase;
     }
 
+    @keyframes arcade-pattern-drift {
+      to {
+        background-position: 96px 192px, -90px 256px, 64px 128px, 64px 128px;
+      }
+    }
+
     @keyframes logo-in {
       from { opacity: 0; transform: scale(.985); }
       to { opacity: 1; transform: none; }
@@ -789,10 +596,6 @@
 
       .hero-copy {
         max-width: 680px;
-      }
-
-      .game-intro {
-        grid-template-columns: minmax(120px, 220px) 1fr;
       }
 
       .level-card {
@@ -832,81 +635,41 @@
         font-size: 10px;
       }
 
-      .nav-links a:nth-child(2) {
+      .nav-links a:nth-child(3) {
         display: none;
       }
 
-      .game-hero {
-        padding-top: 34px;
+      .brand-hero {
+        padding-top: 18px;
+      }
+
+      .hero-logo {
+        width: min(92vw, 390px);
+        margin-bottom: 24px;
+      }
+
+      .hero-heading {
+        gap: 16px;
+        margin-bottom: 24px;
+        text-align: center;
+      }
+
+      .hero-heading .eyebrow {
+        justify-content: center;
+      }
+
+      .hero-copy {
+        margin-inline: auto;
       }
 
       h1 {
         font-size: clamp(40px, 15vw, 68px);
       }
 
-      .arcade-cabinet {
-        padding: 7px;
-      }
-
-      .game-screen {
-        aspect-ratio: 4 / 3;
-      }
-
-      .game-intro {
-        grid-template-columns: 1fr;
-        align-content: center;
-        gap: 12px;
-        text-align: center;
-      }
-
-      .intro-logo {
-        width: 118px;
-        margin-inline: auto;
-      }
-
-      .intro-copy h2 {
-        margin-bottom: 8px;
-        font-size: 27px;
-      }
-
-      .intro-copy p {
-        margin: 0 auto 14px;
-        font-size: 12px;
-        line-height: 1.45;
-      }
-
-      .intro-actions {
-        justify-content: center;
-      }
-
       .game-button {
         min-height: 42px;
         padding-inline: 15px;
         font-size: 11px;
-      }
-
-      .screen-status {
-        display: none;
-      }
-
-      .game-toolbar {
-        grid-template-columns: 1fr;
-      }
-
-      .toolbar-actions {
-        width: 100%;
-      }
-
-      .icon-button {
-        flex: 1;
-      }
-
-      .touch-controls {
-        display: grid;
-      }
-
-      .instructions {
-        font-size: 12px;
       }
 
       .section-heading {
@@ -951,7 +714,7 @@
   </style>
 </head>
 <body>
-  <a class="skip-link" href="#arcade">Skip to arcade</a>
+  <a class="skip-link" href="#identity">Skip to content</a>
 
   <header class="topbar">
     <nav class="wrap nav" aria-label="Primary navigation">
@@ -960,7 +723,7 @@
         <span>Marz<em>Barz</em> Game Lab</span>
       </a>
       <div class="nav-links">
-        <a href="#arcade">Play</a>
+        <a href="#top">Home</a>
         <a href="#shaun">Shaun Mecca</a>
         <a href="#approach">Your story</a>
       </div>
@@ -968,8 +731,15 @@
   </header>
 
   <main id="top">
-    <section class="game-hero" id="arcade">
+    <section class="brand-hero" id="identity">
       <div class="wrap">
+        <div class="hero-logo" id="introLogo">
+          <video id="logoVideo" autoplay muted playsinline preload="auto" aria-label="Animated MarzBarz Game Lab logo">
+            <source src="MarzBarzLogo.mp4" type="video/mp4">
+          </video>
+          <img src="marzbarz.png" alt="MarzBarz Game Lab">
+        </div>
+
         <div class="hero-heading">
           <div>
             <div class="eyebrow">Individuality in play</div>
@@ -978,51 +748,6 @@
           <p class="hero-copy">We turn people, personalities, and brands into nostalgic game experiences with a polished modern twist.</p>
         </div>
 
-        <div class="arcade-cabinet">
-          <div class="game-screen">
-            <canvas id="portalGame" width="960" height="540" tabindex="0" aria-label="Marz Barz Portal Run. Use arrow keys or A and D to move, and Space or W to jump. Collect eight energy orbs and avoid obstacles."></canvas>
-
-            <div class="screen-status" aria-hidden="true"><i></i> Arcade lobby</div>
-
-            <div class="game-intro" id="gameIntro">
-              <div class="intro-logo" id="introLogo">
-                <video id="logoVideo" autoplay muted playsinline preload="auto" aria-label="Animated MarzBarz Game Lab logo">
-                  <source src="MarzBarzLogo.mp4" type="video/mp4">
-                </video>
-                <img src="marzbarz.png" alt="MarzBarz Game Lab">
-              </div>
-              <div class="intro-copy">
-                <div class="eyebrow">Arcade lobby</div>
-                <h2>Portal <span>Run</span></h2>
-                <p>Collect eight energy orbs, dodge the blocks, and unlock the gateway to Shaun Mecca.</p>
-                <div class="intro-actions">
-                  <button class="game-button" type="button" id="startGame">Start game</button>
-                  <a class="game-button alt" href="games/shaun-mecca/" target="_blank" rel="noopener noreferrer">Skip to Shaun</a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="game-toolbar">
-            <div class="instructions">
-              <span><b>Move</b> ← → or A D</span>
-              <span><b>Jump</b> Space or W</span>
-              <span><b>Goal</b> Collect 8 energy</span>
-            </div>
-            <div class="toolbar-actions">
-              <a class="icon-button portal-link" id="portalLaunch" href="games/shaun-mecca/" target="_blank" rel="noopener noreferrer">Play Shaun</a>
-              <button class="icon-button" type="button" id="pauseGame">Pause</button>
-              <button class="icon-button" type="button" id="restartGame">Restart</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="touch-controls" aria-label="Touch game controls">
-          <button class="touch-button" type="button" data-control="left" aria-label="Move left">← Left</button>
-          <button class="touch-button jump" type="button" data-control="jump" aria-label="Jump">Jump</button>
-          <button class="touch-button" type="button" data-control="right" aria-label="Move right">Right →</button>
-        </div>
-        <p id="gameAnnouncement" class="skip-link" aria-live="polite"></p>
       </div>
     </section>
 
@@ -1100,474 +825,31 @@
     (() => {
       "use strict";
 
-      const canvas = document.getElementById("portalGame");
-      const ctx = canvas.getContext("2d");
-      const intro = document.getElementById("gameIntro");
-      const introLogo = document.getElementById("introLogo");
-      const logoVideo = document.getElementById("logoVideo");
-      const startButton = document.getElementById("startGame");
-      const pauseButton = document.getElementById("pauseGame");
-      const restartButton = document.getElementById("restartGame");
-      const portalLaunch = document.getElementById("portalLaunch");
-      const announcement = document.getElementById("gameAnnouncement");
-      const W = canvas.width;
-      const H = canvas.height;
-      const groundY = 440;
-      const palette = {
-        black: "#03030a",
-        blue: "#1559ff",
-        purple: "#7a2cff",
-        cyan: "#20f4ff",
-        magenta: "#ff2bd6",
-        white: "#f5fbff"
-      };
-
-      let state = "intro";
-      let frame = 0;
-      let lastTime = 0;
-      let paused = false;
-      let logoReady = false;
-      let score = 0;
-      let energy = 0;
-      let lives = 3;
-      let speed = 4.2;
-      let shake = 0;
-      let portalPulse = 0;
-      let collectibles = [];
-      let obstacles = [];
-      let particles = [];
-      const keys = { left: false, right: false, jump: false };
-      const player = {
-        x: 150,
-        y: groundY - 48,
-        width: 34,
-        height: 48,
-        vx: 0,
-        vy: 0,
-        grounded: true,
-        invulnerable: 0
-      };
-
-      const stars = Array.from({ length: 88 }, (_, i) => ({
-        x: (i * 127) % W,
-        y: (i * 71) % 300,
-        size: i % 11 === 0 ? 2 : 1,
-        color: i % 3 === 0 ? palette.cyan : i % 3 === 1 ? palette.blue : palette.purple
-      }));
-
-      const buildings = Array.from({ length: 18 }, (_, i) => ({
-        x: i * 76,
-        width: 40 + (i * 17) % 56,
-        height: 48 + (i * 31) % 120
-      }));
+      const logo = document.getElementById("introLogo");
+      const video = document.getElementById("logoVideo");
+      let revealed = false;
 
       function revealLogo() {
-        if (logoReady) return;
-        logoReady = true;
-        introLogo.classList.add("reveal");
-        intro.classList.add("ready");
-        logoVideo.pause();
+        if (revealed) return;
+        revealed = true;
+        logo.classList.add("reveal");
+        video.pause();
       }
 
-      logoVideo.addEventListener("ended", revealLogo);
-      logoVideo.addEventListener("error", revealLogo);
-      const logoPlay = logoVideo.play();
-      if (logoPlay && typeof logoPlay.catch === "function") {
-        logoPlay.catch(() => window.setTimeout(revealLogo, 400));
-      }
-      window.setTimeout(() => {
-        if (logoVideo.paused && !logoVideo.ended) revealLogo();
-      }, 2600);
+      video.addEventListener("ended", revealLogo);
+      video.addEventListener("error", revealLogo);
 
-      function resetGame(autoStart = false) {
-        frame = 0;
-        score = 0;
-        energy = 0;
-        lives = 3;
-        speed = 4.2;
-        shake = 0;
-        portalPulse = 0;
-        collectibles = [];
-        obstacles = [];
-        particles = [];
-        portalLaunch.classList.remove("ready");
-        Object.assign(player, {
-          x: 150,
-          y: groundY - 48,
-          vx: 0,
-          vy: 0,
-          grounded: true,
-          invulnerable: 0
-        });
-        state = autoStart ? "playing" : "intro";
-        paused = false;
-        pauseButton.textContent = "Pause";
-        if (autoStart) announcement.textContent = "Portal Run started. Collect eight energy orbs.";
-      }
-
-      function startGame() {
-        resetGame(true);
-        intro.classList.add("hidden");
-        canvas.focus();
-      }
-
-      function spawnCollectible() {
-        collectibles.push({
-          x: W + 32,
-          y: 280 + Math.random() * 120,
-          size: 18,
-          phase: Math.random() * Math.PI * 2
-        });
-      }
-
-      function spawnObstacle() {
-        const height = 34 + Math.random() * 34;
-        obstacles.push({
-          x: W + 40,
-          y: groundY - height,
-          width: 30 + Math.random() * 24,
-          height
-        });
-      }
-
-      function createBurst(x, y, color, amount = 12) {
-        for (let i = 0; i < amount; i += 1) {
-          particles.push({
-            x,
-            y,
-            vx: (Math.random() - .5) * 6,
-            vy: (Math.random() - .8) * 6,
-            life: 26 + Math.random() * 22,
-            color,
-            size: Math.random() > .55 ? 4 : 2
-          });
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        revealLogo();
+      } else {
+        const playAttempt = video.play();
+        if (playAttempt && typeof playAttempt.catch === "function") {
+          playAttempt.catch(() => window.setTimeout(revealLogo, 300));
         }
+        window.setTimeout(() => {
+          if (video.paused && !video.ended) revealLogo();
+        }, 2600);
       }
-
-      function intersects(a, b) {
-        return a.x < b.x + b.width &&
-          a.x + a.width > b.x &&
-          a.y < b.y + b.height &&
-          a.y + a.height > b.y;
-      }
-
-      function jump() {
-        if (state !== "playing" || paused) return;
-        if (player.grounded) {
-          player.vy = -12.8;
-          player.grounded = false;
-          createBurst(player.x + player.width / 2, groundY, palette.cyan, 8);
-        }
-      }
-
-      function update() {
-        if (state !== "playing" || paused) return;
-        frame += 1;
-        speed = Math.min(7.2, 4.2 + score / 2200);
-
-        if (keys.left) player.vx -= .72;
-        if (keys.right) player.vx += .72;
-        player.vx *= .78;
-        player.x += player.vx;
-        player.x = Math.max(42, Math.min(W - player.width - 42, player.x));
-
-        player.vy += .68;
-        player.y += player.vy;
-        if (player.y + player.height >= groundY) {
-          player.y = groundY - player.height;
-          player.vy = 0;
-          player.grounded = true;
-        }
-
-        if (player.invulnerable > 0) player.invulnerable -= 1;
-        if (shake > 0) shake -= 1;
-        portalPulse += .06;
-
-        if (frame % 82 === 0) spawnCollectible();
-        if (frame > 120 && frame % 155 === 0) spawnObstacle();
-
-        collectibles.forEach(item => {
-          item.x -= speed;
-          item.phase += .09;
-          item.y += Math.sin(item.phase) * .45;
-        });
-        obstacles.forEach(item => {
-          item.x -= speed;
-        });
-
-        collectibles = collectibles.filter(item => {
-          const hitbox = { x: item.x - 4, y: item.y - 4, width: item.size + 8, height: item.size + 8 };
-          if (intersects(player, hitbox)) {
-            energy = Math.min(8, energy + 1);
-            score += 120;
-            createBurst(item.x, item.y, energy === 8 ? palette.purple : palette.cyan, 16);
-            if (energy === 8) portalLaunch.classList.add("ready");
-            announcement.textContent = energy === 8 ? "Portal unlocked." : `Energy ${energy} of 8 collected.`;
-            return false;
-          }
-          return item.x > -40;
-        });
-
-        obstacles = obstacles.filter(item => {
-          if (intersects(player, item) && player.invulnerable <= 0) {
-            lives -= 1;
-            player.invulnerable = 90;
-            player.vy = -7;
-            shake = 12;
-            createBurst(player.x + player.width / 2, player.y + player.height / 2, palette.magenta, 20);
-            announcement.textContent = lives > 0 ? `${lives} lives remaining.` : "Game over. Press restart to try again.";
-            if (lives <= 0) state = "gameover";
-          }
-          return item.x > -70;
-        });
-
-        particles.forEach(particle => {
-          particle.x += particle.vx;
-          particle.y += particle.vy;
-          particle.vy += .16;
-          particle.life -= 1;
-        });
-        particles = particles.filter(particle => particle.life > 0);
-
-        if (energy >= 8 && player.x + player.width > W - 108) {
-          state = "won";
-          score += 1000;
-          portalLaunch.classList.add("ready");
-          announcement.textContent = "Portal reached. Shaun Mecca is ready.";
-        }
-
-        score += 1;
-      }
-
-      function drawPixelText(text, x, y, size, color, align = "left") {
-        ctx.fillStyle = color;
-        ctx.font = `700 ${size}px "Chakra Petch", sans-serif`;
-        ctx.textAlign = align;
-        ctx.textBaseline = "top";
-        ctx.fillText(text, x, y);
-      }
-
-      function drawBackground() {
-        const gradient = ctx.createLinearGradient(0, 0, 0, H);
-        gradient.addColorStop(0, "#050514");
-        gradient.addColorStop(.65, "#0a0a24");
-        gradient.addColorStop(1, "#03030a");
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, W, H);
-
-        stars.forEach((star, index) => {
-          const x = (star.x - (frame * (.08 + (index % 4) * .03))) % W;
-          ctx.globalAlpha = .35 + (index % 5) * .12;
-          ctx.fillStyle = star.color;
-          ctx.fillRect(x < 0 ? x + W : x, star.y, star.size, star.size);
-        });
-        ctx.globalAlpha = 1;
-
-        const horizon = 330;
-        ctx.fillStyle = "rgba(21,89,255,.14)";
-        buildings.forEach((building, index) => {
-          const totalWidth = buildings.length * 76;
-          const x = (building.x - frame * .45) % totalWidth;
-          const drawX = x < -building.width ? x + totalWidth : x;
-          ctx.fillRect(drawX, horizon - building.height, building.width, building.height);
-          ctx.fillStyle = index % 3 === 0 ? "rgba(32,244,255,.35)" : "rgba(255,43,214,.25)";
-          for (let wy = horizon - building.height + 12; wy < horizon - 8; wy += 20) {
-            for (let wx = drawX + 9; wx < drawX + building.width - 5; wx += 18) {
-              if ((wx + wy + index) % 3) ctx.fillRect(wx, wy, 4, 6);
-            }
-          }
-          ctx.fillStyle = "rgba(21,89,255,.14)";
-        });
-
-        ctx.strokeStyle = "rgba(32,244,255,.2)";
-        ctx.lineWidth = 1;
-        for (let y = horizon; y <= H; y += 28) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(W, y);
-          ctx.stroke();
-        }
-        for (let x = -W; x < W * 2; x += 80) {
-          const offset = (frame * speed * .35) % 80;
-          ctx.beginPath();
-          ctx.moveTo(W / 2, horizon);
-          ctx.lineTo(x - offset, H);
-          ctx.stroke();
-        }
-
-        ctx.fillStyle = "#070713";
-        ctx.fillRect(0, groundY, W, H - groundY);
-        ctx.fillStyle = palette.cyan;
-        ctx.fillRect(0, groundY, W, 3);
-        ctx.fillStyle = palette.purple;
-        for (let x = -(frame * speed) % 64; x < W; x += 64) {
-          ctx.fillRect(x, groundY + 22, 32, 5);
-        }
-      }
-
-      function drawPlayer() {
-        if (player.invulnerable > 0 && Math.floor(player.invulnerable / 6) % 2 === 0) return;
-        const x = Math.round(player.x);
-        const y = Math.round(player.y);
-        ctx.fillStyle = palette.blue;
-        ctx.fillRect(x + 7, y + 6, 20, 30);
-        ctx.fillStyle = palette.cyan;
-        ctx.fillRect(x + 11, y, 12, 8);
-        ctx.fillRect(x + 2, y + 15, 8, 12);
-        ctx.fillStyle = palette.purple;
-        ctx.fillRect(x + 24, y + 15, 8, 12);
-        ctx.fillStyle = palette.white;
-        ctx.fillRect(x + 13, y + 9, 4, 4);
-        ctx.fillRect(x + 20, y + 9, 4, 4);
-        ctx.fillStyle = palette.purple;
-        ctx.fillRect(x + 8, y + 36, 8, 10);
-        ctx.fillRect(x + 20, y + 36, 8, 10);
-      }
-
-      function drawCollectibles() {
-        collectibles.forEach(item => {
-          const size = item.size;
-          const x = Math.round(item.x);
-          const y = Math.round(item.y);
-          ctx.fillStyle = energy >= 7 ? palette.purple : palette.cyan;
-          ctx.fillRect(x + 5, y, size - 10, size);
-          ctx.fillRect(x, y + 5, size, size - 10);
-          ctx.fillStyle = palette.white;
-          ctx.fillRect(x + 7, y + 7, 4, 4);
-        });
-      }
-
-      function drawObstacles() {
-        obstacles.forEach(item => {
-          const x = Math.round(item.x);
-          const y = Math.round(item.y);
-          ctx.fillStyle = palette.purple;
-          ctx.fillRect(x, y, item.width, item.height);
-          ctx.fillStyle = palette.magenta;
-          ctx.fillRect(x + 6, y + 7, item.width - 12, 5);
-          ctx.fillStyle = "rgba(3,3,10,.6)";
-          ctx.fillRect(x + 8, y + 20, item.width - 16, item.height - 27);
-        });
-      }
-
-      function drawParticles() {
-        particles.forEach(particle => {
-          ctx.globalAlpha = Math.max(0, particle.life / 42);
-          ctx.fillStyle = particle.color;
-          ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
-        });
-        ctx.globalAlpha = 1;
-      }
-
-      function drawPortal() {
-        if (energy < 8) return;
-        const x = W - 106;
-        const y = 246;
-        const pulse = 4 + Math.sin(portalPulse) * 3;
-        ctx.strokeStyle = palette.magenta;
-        ctx.lineWidth = 5;
-        ctx.strokeRect(x - pulse, y - pulse, 66 + pulse * 2, 154 + pulse * 2);
-        ctx.strokeStyle = palette.cyan;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x + 8, y + 8, 50, 138);
-        ctx.fillStyle = "rgba(32,244,255,.11)";
-        ctx.fillRect(x + 10, y + 10, 46, 134);
-        drawPixelText("PORTAL", x + 33, y - 30, 15, palette.purple, "center");
-      }
-
-      function drawHud() {
-        ctx.fillStyle = "rgba(3,3,10,.72)";
-        ctx.fillRect(18, 18, 330, 54);
-        drawPixelText(`SCORE ${String(score).padStart(6, "0")}`, 34, 29, 18, palette.white);
-        drawPixelText(`ENERGY ${energy}/8`, 204, 29, 18, energy >= 8 ? palette.purple : palette.cyan);
-        drawPixelText(`LIVES ${"◆".repeat(Math.max(0, lives))}`, W - 28, 29, 18, palette.white, "right");
-
-        if (state === "won") {
-          ctx.fillStyle = "rgba(3,3,10,.76)";
-          ctx.fillRect(0, 0, W, H);
-          drawPixelText("PORTAL REACHED", W / 2, 190, 50, palette.purple, "center");
-          drawPixelText("SELECT PLAY SHAUN BELOW", W / 2, 264, 21, palette.white, "center");
-        } else if (state === "gameover") {
-          ctx.fillStyle = "rgba(3,3,10,.8)";
-          ctx.fillRect(0, 0, W, H);
-          drawPixelText("GAME OVER", W / 2, 196, 54, palette.magenta, "center");
-          drawPixelText("PRESS RESTART TO TRY AGAIN", W / 2, 270, 21, palette.white, "center");
-        } else if (paused && state === "playing") {
-          ctx.fillStyle = "rgba(3,3,10,.72)";
-          ctx.fillRect(0, 0, W, H);
-          drawPixelText("PAUSED", W / 2, 222, 54, palette.cyan, "center");
-        } else if (energy >= 8) {
-          drawPixelText("GATEWAY OPEN — SHAUN IS READY", W / 2, 90, 20, palette.purple, "center");
-        }
-      }
-
-      function draw() {
-        ctx.save();
-        if (shake > 0) ctx.translate((Math.random() - .5) * 8, (Math.random() - .5) * 8);
-        drawBackground();
-        drawPortal();
-        drawCollectibles();
-        drawObstacles();
-        drawPlayer();
-        drawParticles();
-        drawHud();
-        ctx.restore();
-      }
-
-      function loop(time) {
-        if (time - lastTime > 15) {
-          update();
-          draw();
-          lastTime = time;
-        }
-        requestAnimationFrame(loop);
-      }
-
-      function handleKey(event, pressed) {
-        const key = event.key.toLowerCase();
-        if (["arrowleft", "arrowright", "arrowup", " ", "a", "d", "w"].includes(key)) event.preventDefault();
-        if (key === "arrowleft" || key === "a") keys.left = pressed;
-        if (key === "arrowright" || key === "d") keys.right = pressed;
-        if (pressed && (key === " " || key === "w" || key === "arrowup")) jump();
-        if (pressed && key === "enter" && state === "intro" && logoReady) startGame();
-        if (pressed && key === "p" && state === "playing") togglePause();
-      }
-
-      function togglePause() {
-        if (state !== "playing") return;
-        paused = !paused;
-        pauseButton.textContent = paused ? "Resume" : "Pause";
-        announcement.textContent = paused ? "Game paused." : "Game resumed.";
-      }
-
-      window.addEventListener("keydown", event => handleKey(event, true));
-      window.addEventListener("keyup", event => handleKey(event, false));
-      startButton.addEventListener("click", startGame);
-      pauseButton.addEventListener("click", togglePause);
-      restartButton.addEventListener("click", () => {
-        intro.classList.add("hidden");
-        resetGame(true);
-      });
-
-      document.querySelectorAll("[data-control]").forEach(button => {
-        const control = button.dataset.control;
-        const press = event => {
-          event.preventDefault();
-          if (control === "jump") jump();
-          else keys[control] = true;
-        };
-        const release = event => {
-          event.preventDefault();
-          if (control !== "jump") keys[control] = false;
-        };
-        button.addEventListener("pointerdown", press);
-        button.addEventListener("pointerup", release);
-        button.addEventListener("pointercancel", release);
-        button.addEventListener("pointerleave", release);
-      });
-
-      resetGame(false);
-      requestAnimationFrame(loop);
     })();
   </script>
 </body>
