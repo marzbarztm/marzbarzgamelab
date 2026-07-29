@@ -203,6 +203,60 @@ let playerLane = 0, targetLane = 0, playerX = W/2;
 let jumpT = 0, jumping = false, hurtT = 0, invincible = 0;
 let hearts = 5, beers = 0, coins = 0, score = 0;
 let highScore = Number(localStorage.getItem('shaunLastBeerRunHighScore') || 0);
+const GAME_ID = 'shaun-mecca';
+let globalScores = [];
+let leaderboardStatus = 'Loading online scores...';
+let scoreSubmittedForRun = false;
+
+function getLeaderboardPlayer(){
+  let id = localStorage.getItem('marzBarzPlayerId');
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : 'player-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+    localStorage.setItem('marzBarzPlayerId', id);
+  }
+  let name = localStorage.getItem('marzBarzPlayerName');
+  if (!name) {
+    name = 'PLAYER ' + id.replace(/[^a-z0-9]/gi,'').slice(-4).toUpperCase();
+    localStorage.setItem('marzBarzPlayerName', name);
+  }
+  return { id, name };
+}
+
+async function loadGlobalScores(){
+  try {
+    const response = await fetch('/api/scores/' + GAME_ID, { headers: { 'Accept': 'application/json' } });
+    if (!response.ok) throw new Error('Leaderboard unavailable');
+    const data = await response.json();
+    globalScores = Array.isArray(data.scores) ? data.scores.slice(0, 5) : [];
+    if (globalScores[0]) highScore = Math.max(highScore, Number(globalScores[0].score) || 0);
+    leaderboardStatus = globalScores.length ? '' : 'BE THE FIRST ON THE BOARD';
+  } catch (error) {
+    leaderboardStatus = 'ONLINE SCORES TEMPORARILY OFFLINE';
+  }
+}
+
+async function submitGlobalScore(finalScore){
+  if (scoreSubmittedForRun || !Number.isFinite(finalScore) || finalScore < 0) return;
+  scoreSubmittedForRun = true;
+  leaderboardStatus = 'SAVING SCORE...';
+  try {
+    const player = getLeaderboardPlayer();
+    const response = await fetch('/api/scores/' + GAME_ID, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ playerId: player.id, playerName: player.name, score: Math.floor(finalScore) })
+    });
+    if (!response.ok) throw new Error('Score not saved');
+    const data = await response.json();
+    globalScores = Array.isArray(data.scores) ? data.scores.slice(0, 5) : globalScores;
+    if (globalScores[0]) highScore = Math.max(highScore, Number(globalScores[0].score) || 0);
+    leaderboardStatus = '';
+  } catch (error) {
+    leaderboardStatus = 'SCORE SAVED ON THIS DEVICE';
+  }
+}
+
+loadGlobalScores();
 let objects = [], spawnClock = 0;
 let effects = [];
 let lastSafeLane = 0, rowsSinceBeer = 0;
@@ -326,7 +380,7 @@ async function playIntro(introHeyStarted=false){
 
 function resetRun(){
   playerLane=targetLane=0; playerX=W/2; jumping=false; jumpT=0; hurtT=0; invincible=0;
-  hearts=5; beers=0; coins=0; score=0; objects=[]; effects=[]; spawnClock=0.55; lastSafeLane=0; rowsSinceBeer=0;
+  hearts=5; beers=0; coins=0; score=0; objects=[]; effects=[]; spawnClock=0.55; lastSafeLane=0; rowsSinceBeer=0; scoreSubmittedForRun=false;
   speedMultiplier=1; powerReady=false; powerAnimating=false; bonusTime=0; bonusIntroElapsed=0; bonusIntroFade=1;
   completedBonuses=0; postBonusSpawnPause=0; runTime=0;
 }
@@ -440,6 +494,7 @@ function gameOver(){
   state='ending'; SND.main.pause();
   const isHigh = score > highScore;
   if (isHigh) { highScore=score; localStorage.setItem('shaunLastBeerRunHighScore', String(highScore)); }
+  submitGlobalScore(score);
   setTimeout(()=>{
     if (isHigh){ state='highscore'; playSfx('highSfx'); stopMusicExcept('high'); if(musicOn) playMusic('high',true); }
     else { state='gameover'; playSfx('gameoverSfx'); stopMusicExcept('gameover'); if(musicOn) playMusic('gameover',true); }
@@ -760,18 +815,39 @@ function render(){
   } else if(state==='highscore'){
     drawFull('Screen_HighScore.png'); drawCentered('HighScore_ThreeFriends_Group.png',W/2,1060,900,900);
     drawCentered('Popup_NewHighScore.png',W/2,330,900,450); drawCentered('Popup_WeDidIt.png',W/2,610,760,380);
-    drawText(`SCORE ${score}`,W/2,1320,58); drawText(`HIGH SCORE ${highScore}`,W/2,1400,48);
-    drawCentered('Popup_PlayAgain.png',W/2,1660,700,350);
+    drawText(`SCORE ${score}`,W/2,1260,58); drawText(`HIGH SCORE ${highScore}`,W/2,1335,48);
+    drawOnlineLeaderboard(1400);
+    drawCentered('Popup_PlayAgain.png',W/2,1770,700,350);
   } else if(state==='gameover'){
     drawFull('Screen_GameOver.png'); drawCentered('GameOver_ThreeFriends_Group.png',W/2,1030,900,900);
     drawCentered('Popup_GameOver.png',W/2,390,880,440);
-    drawText(`SCORE ${score}`,W/2,1320,58); drawText(`HIGH SCORE ${highScore}`,W/2,1400,48);
-    drawCentered('Popup_PlayAgain.png',W/2,1660,700,350);
+    drawText(`SCORE ${score}`,W/2,1260,58); drawText(`HIGH SCORE ${highScore}`,W/2,1335,48);
+    drawOnlineLeaderboard(1400);
+    drawCentered('Popup_PlayAgain.png',W/2,1770,700,350);
   } else if(state==='ending'){
     drawFull('Screen_Gameplay.png'); ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(0,0,W,H);
   }
 }
 
+function drawOnlineLeaderboard(startY){
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffd84a';
+  ctx.font = 'bold 38px Arial';
+  ctx.fillText('ALL-TIME TOP SCORES', W/2, startY);
+  ctx.font = 'bold 27px Arial';
+  if (!globalScores.length) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(leaderboardStatus, W/2, startY + 48);
+  } else {
+    globalScores.forEach((entry, index) => {
+      ctx.fillStyle = index === 0 ? '#ffd84a' : '#ffffff';
+      const player = String(entry.playerName || 'PLAYER').slice(0, 16).toUpperCase();
+      ctx.fillText((index + 1) + '. ' + player + '  ' + Number(entry.score || 0), W/2, startY + 48 + index * 35);
+    });
+  }
+  ctx.restore();
+}
 function loop(now){
   const realDt=Math.max(0,(now-last)/1000);
   const dt=Math.min(0.033,realDt);
