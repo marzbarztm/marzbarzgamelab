@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05030b">
+<title>MarzBarz Game Lab | Interactive Worlds</title>
+<meta name="description" content="MarzBarz Game Lab builds interactive worlds, cinematic artist experiences, and browser games worth getting lost in.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --black:#05030b;
+  --panel:#0b0814;
+  --panel2:#100c1d;
+  --white:#f8fbff;
+  --muted:rgba(248,251,255,.68);
+  --cyan:#35efff;
+  --magenta:#ff39d4;
+  --purple:#7e54ff;
+  --line:rgba(53,239,255,.22);
+  --display:"Chakra Petch",system-ui,sans-serif;
+  --body:"Inter",system-ui,sans-serif;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--black)}
+body{
+  margin:0;
+  color:var(--white);
+  font:500 16px/1.65 var(--body);
+  background:
+    radial-gradient(circle at 12% 16%,rgba(255,57,212,.16),transparent 30rem),
+    radial-gradient(circle at 88% 24%,rgba(53,239,255,.13),transparent 32rem),
+    linear-gradient(180deg,#05030b 0%,#090612 52%,#05030b 100%);
+  overflow-x:hidden;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.13;
+  background-image:
+    linear-gradient(rgba(53,239,255,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(53,239,255,.08) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:linear-gradient(to bottom,#000,transparent 76%);
+}
+a{color:inherit}
+.wrap{width:min(1180px,calc(100% - 32px));margin:auto;position:relative}
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:30;
+  backdrop-filter:blur(18px);
+  background:rgba(5,3,11,.84);
+  border-bottom:1px solid var(--line);
+}
+.nav{
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+.brand{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  font:700 .88rem/1 var(--display);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.brand-mark{
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--cyan),var(--purple) 48%,var(--magenta));
+  box-shadow:0 0 24px rgba(53,239,255,.2);
+  position:relative;
+}
+.brand-mark:before,
+.brand-mark:after{
+  content:"";
+  position:absolute;
+  top:9px;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#fff;
+}
+.brand-mark:before{left:7px}
+.brand-mark:after{right:7px}
+.brand em{color:var(--magenta);font-style:normal}
+.navlinks{display:flex;gap:8px}
+.navlinks a{
+  padding:9px 13px;
+  color:var(--muted);
+  text-decoration:none;
+  font-size:.85rem;
+}
+.navlinks a:hover{color:#fff}
+
+.hero{
+  min-height:78vh;
+  padding:96px 0 86px;
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:54px;
+  align-items:center;
+}
+.eyebrow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--cyan);
+  font:700 .74rem/1 var(--display);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+}
+.eyebrow:before{
+  content:"";
+  width:36px;
+  height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--magenta));
+}
+.hero h1{
+  margin:.25em 0;
+  font:700 clamp(4rem,9vw,8rem)/.8 var(--display);
+  letter-spacing:-.07em;
+  text-transform:uppercase;
+}
+.hero h1 span{
+  display:block;
+  color:transparent;
+  -webkit-text-stroke:2px var(--white);
+}
+.hero p{
+  max-width:650px;
+  color:var(--muted);
+  font-size:clamp(1.04rem,2vw,1.24rem);
+}
+.hero p strong{color:#fff}
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:30px;
+}
+.btn{
+  min-height:54px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:0 24px;
+  border-radius:12px;
+  text-decoration:none;
+  font:700 .78rem/1 var(--display);
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  transition:.22s ease;
+}
+.btn:hover{transform:translateY(-3px)}
+.btn-primary{
+  color:#08040d;
+  background:linear-gradient(135deg,var(--cyan),var(--magenta));
+  box-shadow:0 16px 42px rgba(255,57,212,.18);
+}
+.btn-secondary{
+  border:1px solid rgba(53,239,255,.42);
+  background:rgba(10,7,18,.72);
+  box-shadow:inset 0 0 25px rgba(53,239,255,.05);
+}
+.btn-secondary:hover{
+  border-color:var(--cyan);
+  box-shadow:0 0 28px rgba(53,239,255,.14);
+}
+
+.hero-card{
+  position:relative;
+  min-height:500px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:#0b0814;
+  box-shadow:0 34px 100px rgba(0,0,0,.5);
+}
+.hero-card img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  filter:saturate(.9) contrast(1.06) brightness(.78);
+  transition:transform 1s ease;
+}
+.hero-card:hover img{transform:scale(1.035)}
+.hero-card:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg,transparent 44%,rgba(5,3,11,.94)),
+    linear-gradient(120deg,rgba(53,239,255,.08),transparent 40%,rgba(255,57,212,.08));
+}
+.hero-card-copy{
+  position:absolute;
+  left:26px;
+  right:26px;
+  bottom:24px;
+  z-index:2;
+}
+.hero-card-copy small{
+  color:var(--cyan);
+  font:700 .7rem/1 var(--display);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.hero-card-copy h2{
+  margin:10px 0 0;
+  font:700 clamp(1.5rem,3vw,2.4rem)/1.05 var(--display);
+  text-transform:uppercase;
+}
+
+.section{padding:84px 0}
+.section-head{
+  display:grid;
+  grid-template-columns:.9fr 1.1fr;
+  gap:30px;
+  align-items:end;
+  margin-bottom:34px;
+}
+.section h2{
+  margin:0;
+  font:700 clamp(2.6rem,6vw,5.4rem)/.88 var(--display);
+  letter-spacing:-.055em;
+  text-transform:uppercase;
+}
+.section-head p{
+  margin:0;
+  color:var(--muted);
+  font-size:1.04rem;
+}
+.section-head strong{color:var(--magenta)}
+
+.feature{
+  display:grid;
+  grid-template-columns:minmax(280px,.88fr) 1.12fr;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:linear-gradient(145deg,#100c1d,#080611);
+  box-shadow:0 32px 90px rgba(0,0,0,.38);
+}
+.feature-visual{
+  min-height:470px;
+  position:relative;
+  overflow:hidden;
+  background:#0b0814;
+}
+.feature-visual img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform 1s ease;
+}
+.feature:hover .feature-visual img{transform:scale(1.04)}
+.feature-visual:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg,transparent 50%,rgba(5,3,11,.82)),
+    linear-gradient(90deg,transparent 68%,#0b0814);
+}
+.feature-copy{
+  padding:48px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.tag{
+  color:var(--cyan);
+  font:700 .74rem/1 var(--display);
+  letter-spacing:.17em;
+  text-transform:uppercase;
+}
+.feature-copy h3{
+  margin:.28em 0;
+  font:700 clamp(2.7rem,5vw,4.8rem)/.88 var(--display);
+  letter-spacing:-.05em;
+  text-transform:uppercase;
+}
+.feature-copy p{
+  max-width:610px;
+  color:var(--muted);
+  font-size:1.03rem;
+}
+.feature-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:20px;
+}
+
+.lab{
+  padding:20px 0 110px;
+}
+.lab-shell{
+  padding:62px;
+  position:relative;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 15% 20%,rgba(255,57,212,.18),transparent 22rem),
+    radial-gradient(circle at 86% 80%,rgba(53,239,255,.14),transparent 26rem),
+    #0b0814;
+}
+.lab-shell:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(rgba(53,239,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(53,239,255,.05) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(120deg,#000,transparent 70%);
+}
+.lab-shell > *{position:relative}
+.lab h2{
+  max-width:880px;
+  margin:0;
+  font:700 clamp(2.8rem,7vw,6rem)/.88 var(--display);
+  letter-spacing:-.06em;
+  text-transform:uppercase;
+}
+.lab h2 span{
+  color:transparent;
+  -webkit-text-stroke:1.5px var(--cyan);
+}
+.lab p{
+  max-width:680px;
+  color:var(--muted);
+  font-size:1.04rem;
+}
+
+footer{
+  border-top:1px solid var(--line);
+  padding:30px 0 44px;
+  color:var(--muted);
+  font-size:.84rem;
+}
+.footer-row{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  flex-wrap:wrap;
+}
+
+/* subtle motion */
+.reveal{
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+.reveal.in{
+  opacity:1;
+  transform:none;
+}
+.portal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:grid;
+  place-items:center;
+  opacity:0;
+  pointer-events:none;
+  background:#05030b;
+  transition:opacity .32s ease;
+}
+.portal.active{
+  opacity:1;
+  pointer-events:auto;
+}
+.portal-ring{
+  width:58px;
+  height:58px;
+  border:2px solid rgba(255,255,255,.14);
+  border-top-color:var(--cyan);
+  border-right-color:var(--magenta);
+  border-radius:50%;
+  animation:spin .75s linear infinite;
+}
+.portal span{
+  position:absolute;
+  margin-top:108px;
+  color:var(--muted);
+  font:700 .68rem/1 var(--display);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:920px){
+  .hero,
+  .section-head,
+  .feature{
+    grid-template-columns:1fr;
+  }
+  .hero{padding-top:70px}
+  .hero-card{min-height:460px}
+  .feature-visual{min-height:420px}
+  .feature-visual:after{
+    background:linear-gradient(180deg,transparent 50%,#0b0814);
+  }
+}
+@media(max-width:560px){
+  .wrap{width:min(100% - 20px,1180px)}
+  .nav{min-height:64px}
+  .navlinks{display:none}
+  .hero{
+    min-height:auto;
+    padding:54px 0 64px;
+    gap:28px;
+  }
+  .hero h1{font-size:clamp(3.5rem,19vw,5.8rem)}
+  .hero-card{min-height:390px;border-radius:22px}
+  .hero-actions,
+  .feature-actions{
+    flex-direction:column;
+  }
+  .btn{width:100%}
+  .section{padding:58px 0}
+  .section-head{gap:16px}
+  .feature{border-radius:22px}
+  .feature-visual{min-height:340px}
+  .feature-copy{padding:30px 22px}
+  .lab{padding-bottom:80px}
+  .lab-shell{padding:42px 22px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*:before,*:after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+
+<body>
+<header class="topbar">
+  <div class="wrap nav">
+    <a class="brand" href="/" aria-label="MarzBarz Game Lab home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Marz<em>Barz</em> Game Lab</span>
+    </a>
+    <nav class="navlinks" aria-label="Page navigation">
+      <a href="#featured">Featured</a>
+      <a href="#lab">The Lab</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <div class="reveal">
+      <div class="eyebrow">Interactive worlds, built different</div>
+      <h1>Enter <span>Another World</span></h1>
+      <p>
+        MarzBarz Game Lab creates <strong>cinematic digital experiences and browser games</strong>
+        that feel less like websites—and more like stepping through a portal.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#featured">Explore the first world</a>
+        <a class="btn btn-secondary portal-link" href="/games/shaun-mecca/">Play now</a>
+      </div>
+    </div>
+
+    <div class="hero-card reveal">
+      <img
+        src="/games/shaun-mecca/assets/shaunmecca1.1.png"
+        alt="Shaun Mecca's Last Beer Run featured game artwork"
+      >
+      <div class="hero-card-copy">
+        <small>Now entering</small>
+        <h2>Shaun Mecca's Last Beer Run</h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="featured">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>The first world is open</h2>
+        <p>
+          South Texas roads. Loud music. One last beer run.
+          Choose whether to <strong>enter the full experience</strong> or jump straight into the game.
+        </p>
+      </div>
+
+      <article class="feature reveal">
+        <div class="feature-visual">
+          <img
+            src="/games/shaun-mecca/assets/shaunmecca1.1.png"
+            alt="Shaun Mecca's Last Beer Run game artwork"
+            loading="lazy"
+          >
+        </div>
+
+        <div class="feature-copy">
+          <div class="tag">Featured experience</div>
+          <h3>Shaun Mecca</h3>
+          <p>
+            The fridge is empty. The party isn't over.
+            Shaun's got one last run to make.
+          </p>
+
+          <div class="feature-actions">
+            <a class="btn btn-secondary portal-link" href="/shaun-mecca/">
+              Enter Shaun's World
+            </a>
+            <a class="btn btn-primary portal-link" href="/games/shaun-mecca/">
+              Play Now
+            </a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="lab" id="lab">
+    <div class="wrap">
+      <div class="lab-shell reveal">
+        <div class="eyebrow">Inside the lab</div>
+        <h2>Every website is <span>the first level.</span></h2>
+        <p>
+          Different creators. Different atmospheres. Different rules.
+          Every MarzBarz project is built to feel like a doorway—not a template.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 MarzBarz Game Lab</span>
+    <span>We build worlds people can click into.</span>
+  </div>
+</footer>
+
+<div class="portal" id="portal" aria-hidden="true">
+  <div class="portal-ring"></div>
+  <span>Opening the next world...</span>
+</div>
+
+<script>
+(function(){
+  var reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var reveals=document.querySelectorAll(".reveal");
+  if("IntersectionObserver" in window && !reducedMotion){
+    var observer=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add("in");
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:.12});
+
+    reveals.forEach(function(el){observer.observe(el)});
+  }else{
+    reveals.forEach(function(el){el.classList.add("in")});
+  }
+
+  var portal=document.getElementById("portal");
+
+  document.querySelectorAll(".portal-link").forEach(function(link){
+    link.addEventListener("click",function(event){
+      if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+
+      var destination=link.getAttribute("href");
+      if(!destination||destination.charAt(0)==="#")return;
+
+      event.preventDefault();
+      portal.classList.add("active");
+      portal.setAttribute("aria-hidden","false");
+
+      window.setTimeout(function(){
+        window.location.href=destination;
+      },420);
+    });
+  });
+})();
+</script>
+</body>
+</html>
