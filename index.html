@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#030207">
+<title>MarzBarz Game Lab</title>
+<meta name="description" content="Interactive worlds built around the people and personalities behind them.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030207;
+  --panel:#0b0814;
+  --white:#f8fbff;
+  --muted:rgba(248,251,255,.68);
+  --cyan:#35efff;
+  --magenta:#ff39d4;
+  --purple:#7e54ff;
+  --line:rgba(53,239,255,.22);
+  --display:"Chakra Petch",system-ui,sans-serif;
+  --body:"Inter",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{
+  margin:0;
+  color:var(--white);
+  background:
+    radial-gradient(circle at 12% 14%,rgba(255,57,212,.13),transparent 30rem),
+    radial-gradient(circle at 88% 28%,rgba(53,239,255,.11),transparent 32rem),
+    linear-gradient(180deg,#030207 0%,#090611 55%,#030207 100%);
+  font:500 16px/1.65 var(--body);
+  overflow-x:hidden;
+}
+a{color:inherit}
+img,video{display:block;max-width:100%}
+.wrap{width:min(1160px,calc(100% - 24px));margin:auto;position:relative;z-index:2}
+
+/* retro floating pattern */
+.pattern{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.pixel{
+  position:absolute;
+  opacity:.12;
+  color:var(--cyan);
+  animation:float 16s ease-in-out infinite;
+}
+.pixel.magenta{color:var(--magenta)}
+.pixel.purple{color:var(--purple)}
+.pixel:before{
+  content:"";
+  display:block;
+  width:22px;
+  height:22px;
+  border:2px solid currentColor;
+  box-shadow:0 0 12px color-mix(in srgb,currentColor 35%,transparent);
+}
+.pixel.plus:before{
+  width:24px;height:24px;border:0;
+  background:
+    linear-gradient(currentColor,currentColor) center/6px 24px no-repeat,
+    linear-gradient(currentColor,currentColor) center/24px 6px no-repeat;
+}
+.pixel.diamond:before{transform:rotate(45deg)}
+.pixel.dot:before{border-radius:50%;width:16px;height:16px}
+.pixel:nth-child(1){left:6%;top:14%}
+.pixel:nth-child(2){left:86%;top:18%;animation-delay:-5s}
+.pixel:nth-child(3){left:14%;top:54%;animation-delay:-8s}
+.pixel:nth-child(4){left:78%;top:68%;animation-delay:-3s}
+.pixel:nth-child(5){left:46%;top:34%;animation-delay:-11s}
+.pixel:nth-child(6){left:58%;top:84%;animation-delay:-6s}
+.pixel:nth-child(7){left:92%;top:46%;animation-delay:-12s}
+.pixel:nth-child(8){left:28%;top:82%;animation-delay:-2s}
+@keyframes float{
+  0%,100%{transform:translate3d(0,0,0) rotate(0)}
+  50%{transform:translate3d(0,-24px,0) rotate(8deg)}
+}
+
+/* header */
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:rgba(3,2,7,.9);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(18px);
+}
+.nav{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand-icon{width:38px;height:38px;flex:0 0 auto}
+.brand-text{font:700 1rem/1 var(--display);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.brand-text .marz{color:var(--cyan)}
+.brand-text .barz{color:var(--magenta)}
+.brand-text .lab{color:#fff;margin-left:8px}
+
+/* hero intro lives inside the page */
+.hero{
+  min-height:100svh;
+  position:relative;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:#000;
+}
+.hero-video,
+.hero-black,
+.hero-logo{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+.hero-video{
+  object-fit:cover;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .45s ease;
+}
+.hero-video.playing{
+  opacity:1;
+  visibility:visible;
+}
+.hero-video.fade{
+  opacity:0;
+  visibility:hidden;
+}
+.hero-black{
+  background:#000;
+  opacity:0;
+  transition:opacity .8s ease;
+}
+.hero-black.show{opacity:1}
+.hero-logo{
+  object-fit:contain;
+  padding:12vw;
+  opacity:0;
+  transform:scale(.97);
+  transition:opacity .85s ease,transform .85s ease;
+}
+.hero-logo.show{opacity:1;transform:scale(1)}
+.hero-content{
+  position:relative;
+  z-index:4;
+  margin-top:min(52vh,460px);
+  text-align:center;
+  opacity:0;
+  transform:translateY(18px);
+  transition:opacity .8s ease,transform .8s ease;
+}
+.hero-content.show{opacity:1;transform:none}
+.hero-kicker{
+  color:var(--cyan);
+  font:700 .74rem/1 var(--display);
+  letter-spacing:.22em;
+  text-transform:uppercase;
+}
+.hero h1{
+  margin:.3em 0 0;
+  font:700 clamp(4rem,11vw,9rem)/.8 var(--display);
+  letter-spacing:-.07em;
+  text-transform:uppercase;
+}
+.hero h1 span{
+  display:block;
+  color:transparent;
+  -webkit-text-stroke:1.6px #fff;
+}
+.scroll{
+  margin-top:28px;
+  color:var(--muted);
+  font:700 .68rem/1 var(--display);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+
+/* Shaun */
+.shaun{padding:90px 0 110px}
+.shaun-card{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:#0b0814;
+  box-shadow:0 34px 90px rgba(0,0,0,.4);
+}
+.shaun-media{
+  position:relative;
+  min-height:650px;
+  overflow:hidden;
+  background:#09060f;
+}
+.shaun-media img,.shaun-media video{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.shaun-media img{z-index:1}
+.shaun-media video{
+  z-index:2;
+  opacity:0;
+  transition:opacity 1s ease;
+}
+.shaun-media video.ready{opacity:1}
+.shaun-media:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:3;
+  background:linear-gradient(180deg,transparent 48%,rgba(3,2,7,.92));
+  pointer-events:none;
+}
+.shaun-copy{
+  position:relative;
+  z-index:4;
+  margin-top:-130px;
+  padding:0 48px 48px;
+}
+.eyebrow{
+  color:var(--cyan);
+  font:700 .72rem/1 var(--display);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+}
+.shaun h2{
+  margin:.2em 0;
+  font:700 clamp(3rem,7vw,6.5rem)/.84 var(--display);
+  letter-spacing:-.06em;
+  text-transform:uppercase;
+}
+.shaun p{color:var(--muted);font-size:1.08rem}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{
+  min-height:54px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 24px;
+  border-radius:12px;
+  text-decoration:none;
+  font:700 .76rem/1 var(--display);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  transition:.2s ease;
+}
+.btn:hover{transform:translateY(-3px)}
+.btn-secondary{
+  border:1px solid rgba(53,239,255,.45);
+  background:rgba(3,2,7,.65);
+}
+.btn-primary{
+  color:#07030b;
+  background:linear-gradient(135deg,var(--cyan),var(--magenta));
+  box-shadow:0 16px 40px rgba(255,57,212,.18);
+}
+
+/* mission */
+.mission{padding:0 0 110px}
+.mission-card{
+  padding:64px;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 14% 16%,rgba(255,57,212,.16),transparent 24rem),
+    radial-gradient(circle at 88% 78%,rgba(53,239,255,.13),transparent 28rem),
+    #0b0814;
+}
+.mission h2{
+  margin:0;
+  max-width:950px;
+  font:700 clamp(2.8rem,7vw,6rem)/.9 var(--display);
+  letter-spacing:-.06em;
+  text-transform:uppercase;
+}
+.mission h2 span{color:var(--cyan)}
+.mission p{
+  max-width:760px;
+  margin:26px 0 0;
+  color:var(--muted);
+  font-size:1.08rem;
+}
+
+/* teaser */
+.teaser{padding:0 0 110px}
+.teaser-card{
+  min-height:300px;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:#090611;
+}
+.teaser h3{
+  margin:0;
+  font:700 clamp(2.8rem,7vw,5.8rem)/.9 var(--display);
+  letter-spacing:-.055em;
+  text-transform:uppercase;
+}
+.dots{display:flex;justify-content:center;gap:9px;margin-top:22px}
+.dots span{
+  width:8px;height:8px;border-radius:50%;
+  background:linear-gradient(135deg,var(--cyan),var(--magenta));
+  animation:bounce 1.3s infinite;
+}
+.dots span:nth-child(2){animation-delay:.16s}
+.dots span:nth-child(3){animation-delay:.32s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.3}40%{transform:translateY(-8px);opacity:1}}
+
+footer{
+  border-top:1px solid var(--line);
+  padding:30px 0 42px;
+  color:var(--muted);
+  font-size:.84rem;
+}
+.footer-row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+@media(max-width:760px){
+  .brand-text{font-size:.9rem}
+  .hero-logo{padding:20vw 8vw}
+  .hero-content{margin-top:48vh;padding:0 12px}
+  .hero h1{font-size:clamp(3.7rem,19vw,6rem)}
+  .shaun{padding-top:60px}
+  .shaun-card,.mission-card,.teaser-card{border-radius:22px}
+  .shaun-media{min-height:470px}
+  .shaun-copy{margin-top:-92px;padding:0 22px 34px}
+  .shaun h2{font-size:clamp(2.7rem,14vw,4.8rem)}
+  .actions{flex-direction:column}
+  .btn{width:100%}
+  .mission-card{padding:42px 22px}
+  .teaser-card{min-height:260px;padding:28px 18px}
+}
+@media(max-width:420px){
+  .brand-icon{width:34px;height:34px}
+  .brand-text .lab{margin-left:5px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important}
+  .hero-video{display:none}
+  .hero-black,.hero-logo,.hero-content{opacity:1!important;transform:none!important}
+  .shaun-media video{display:none}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<div class="pattern" aria-hidden="true">
+  <span class="pixel plus"></span>
+  <span class="pixel diamond magenta"></span>
+  <span class="pixel dot purple"></span>
+  <span class="pixel plus magenta"></span>
+  <span class="pixel diamond"></span>
+  <span class="pixel dot magenta"></span>
+  <span class="pixel plus purple"></span>
+  <span class="pixel diamond magenta"></span>
+</div>
+
+<header class="topbar">
+  <div class="wrap nav">
+    <a class="brand" href="/" aria-label="MarzBarz Game Lab home">
+      <svg class="brand-icon" viewBox="0 0 64 64" role="img" aria-label="MarzBarz MB icon">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#35efff"/>
+            <stop offset="52%" stop-color="#7e54ff"/>
+            <stop offset="100%" stop-color="#ff39d4"/>
+          </linearGradient>
+        </defs>
+        <rect x="1" y="1" width="62" height="62" rx="14" fill="url(#g)" opacity=".15"/>
+        <path d="M9 22V9h13M42 9h13v13M9 42v13h13M42 55h13V42"
+          fill="none" stroke="url(#g)" stroke-width="5"/>
+        <path d="M18 40V24l9 10 9-10v16M39 24h7c4 0 6 2 6 5 0 2-1 4-4 5 3 0 5 2 5 5 0 4-3 6-8 6h-6z"
+          fill="none" stroke="#fff" stroke-width="4"/>
+      </svg>
+
+      <span class="brand-text">
+        <span class="marz">Marz</span><span class="barz">Barz</span><span class="lab">Game Lab</span>
+      </span>
+    </a>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="top">
+    <video id="heroVideo" class="hero-video" autoplay muted playsinline webkit-playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback">
+      <source src="/MarzBarzLogo.mp4" type="video/mp4">
+    </video>
+    <div id="heroBlack" class="hero-black"></div>
+    <img id="heroLogo" class="hero-logo" src="/marzbarz.png" alt="MarzBarz Game Lab logo">
+
+    <div id="heroContent" class="hero-content">
+      <div class="hero-kicker">Interactive worlds</div>
+      <h1>Enter<span>Another World</span></h1>
+      <div class="scroll">Scroll to begin</div>
+    </div>
+  </section>
+
+  <section class="shaun" id="shaun">
+    <div class="wrap">
+      <article class="shaun-card reveal">
+        <div class="shaun-media">
+          <img src="/shaunmecca1.1.png" alt="Shaun Mecca's Last Beer Run artwork">
+          <video id="shaunVideo" muted loop playsinline preload="metadata" poster="/shaunmecca1.1.png">
+            <source src="/shaunmecca.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="shaun-copy">
+          <div class="eyebrow">Now entering</div>
+          <h2>Shaun Mecca's Last Beer Run</h2>
+          <p>Built on long nights, cold beer, and South Texas roads.</p>
+          <div class="actions">
+            <a class="btn btn-secondary" href="/shaun-mecca/">Enter Shaun's World</a>
+            <a class="btn btn-primary" href="/games/shaun-mecca/">Play Now</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="mission">
+    <div class="wrap">
+      <div class="mission-card reveal">
+        <div class="eyebrow">Why MarzBarz exists</div>
+        <h2>Every creator has a story. <span>Every story deserves its own world.</span></h2>
+        <p>
+          MarzBarz Game Lab turns artists, creators, and original ideas into interactive
+          experiences that feel as unique as the people behind them.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="teaser">
+    <div class="wrap">
+      <div class="teaser-card reveal">
+        <div>
+          <h3>More worlds are loading...</h3>
+          <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 MarzBarz Game Lab</span>
+    <span>Made with late nights and questionable ideas.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var heroVideo = document.getElementById("heroVideo");
+  var heroBlack = document.getElementById("heroBlack");
+  var heroLogo = document.getElementById("heroLogo");
+  var heroContent = document.getElementById("heroContent");
+
+  var heroFinished = false;
+  var heroStarted = false;
+
+  function revealHero(){
+    if(heroFinished)return;
+    heroFinished = true;
+
+    heroVideo.classList.remove("playing");
+    heroVideo.classList.add("fade");
+    heroBlack.classList.add("show");
+
+    window.setTimeout(function(){
+      heroLogo.classList.add("show");
+      heroContent.classList.add("show");
+    },650);
+  }
+
+  function showPlayingVideo(){
+    if(heroFinished || heroStarted)return;
+    heroStarted = true;
+    heroVideo.classList.add("playing");
+  }
+
+  if(!reduced){
+    heroVideo.addEventListener("playing", showPlayingVideo);
+    heroVideo.addEventListener("ended", revealHero);
+    heroVideo.addEventListener("error", revealHero);
+
+    var attempt = heroVideo.play();
+    if(attempt && typeof attempt.then === "function"){
+      attempt.then(function(){
+        if(!heroVideo.paused)showPlayingVideo();
+      }).catch(function(){
+        revealHero();
+      });
+    }else{
+      window.setTimeout(function(){
+        if(!heroVideo.paused){
+          showPlayingVideo();
+        }else{
+          revealHero();
+        }
+      },500);
+    }
+
+    window.setTimeout(function(){
+      if(!heroStarted)revealHero();
+    },1400);
+
+    window.setTimeout(revealHero,6000);
+  }else{
+    revealHero();
+  }
+
+  var shaunVideo = document.getElementById("shaunVideo");
+  if(!reduced && "IntersectionObserver" in window){
+    var videoObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var p = shaunVideo.play();
+          if(p && typeof p.then === "function"){
+            p.then(function(){
+              shaunVideo.classList.add("ready");
+            }).catch(function(){});
+          }
+        }else{
+          shaunVideo.pause();
+        }
+      });
+    },{threshold:.3});
+    videoObserver.observe(shaunVideo);
+  }
+
+  var reveals = document.querySelectorAll(".reveal");
+  if("IntersectionObserver" in window && !reduced){
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add("in");
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:.12});
+    reveals.forEach(function(el){observer.observe(el)});
+  }else{
+    reveals.forEach(function(el){el.classList.add("in")});
+  }
+})();
+</script>
+</body>
+</html>
