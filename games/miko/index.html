@@ -44,7 +44,7 @@ const files={
  bg:'GamePlay Background.png',logo:'MikosSuperGame Logo.png',run:'MIKO-Running.png',jump:'Miko-JUMP.png',hurt:'MIKO-Hurt.png',front:'MIKO-Front.png',power:'SUPERMIKO.png',basic:'10.png',zig:'11.png',boss:'12.png',coin:'Spider Coin.png',meter:'Power Meter Collectible.png',heart:'Bonus Life Heart.png',web:'Web Shot Projectile.png',enemyShot:'Enemy Attack Projectile.png',bossShot:'Boss Attack.png',vent:'Small Rooftop Vent.png',pipes:'Rooftop Pipes.png',ac:'Large Air-Conditioning Unit.png',dish:'Satellite Dish.png',ebox:'Electrical Box.png',hazard:'Hazard.png',floor:'Floor Hazard.png',gameover:'GameOver.png',gameoverBg:'GAMEOVER Background.png',high:'New High Score.png',you:'YOUDIDIT.png',amazing:'AMAZING.png',bonus:'Bonus.png'
 };
 let loaded=0; Object.entries(files).forEach(([k,v])=>{let i=new Image();i.onload=i.onerror=()=>loaded++;i.src=encodeURI(v);A[k]=i});
-const audio={music:new Audio('background_music.WAV'),jump:new Audio('sfx_jump.wav.mp3'),damage:new Audio('sfx_damagetaken.WAV'),over:new Audio('gsfx_gameover.WAV'),high:new Audio('sfx_newhighschore.WAV'),ready:new Audio('sfx_power_ready.wav.mp3')};
+const audio={music:new Audio('background_music.MP3'),jump:new Audio('sfx_jump.wav.mp3'),damage:new Audio('sfx_damagetaken.WAV'),over:new Audio('gsfx_gameover.WAV'),high:new Audio('sfx_newhighschore.WAV'),ready:new Audio('sfx_power_ready.wav.mp3')};
 audio.music.loop=true;audio.music.volume=.28;Object.values(audio).forEach(a=>a.preload='auto');let muted=false;
 function sfx(k){if(muted)return;const a=audio[k];if(!a)return;try{a.currentTime=0;a.play()}catch{}}
 $('sound').onclick=()=>{muted=!muted;$('sound').textContent=muted?'🔇':'🔊';audio.music.muted=muted};
