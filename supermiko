@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#070b2b" />
+<title>Miko's Super Spider Adventure</title>
+<style>
+:root{--ink:#fff;--navy:#060a27;--blue:#0d1b63;--cyan:#4de7ff;--pink:#ff477e;--gold:#ffd34d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#030617;color:var(--ink);font-family:ui-rounded,"Arial Rounded MT Bold",system-ui,sans-serif;touch-action:none}
+body{display:grid;place-items:center}
+#shell{position:relative;width:min(100vw,56.25vh);height:min(100vh,177.78vw);max-width:100vw;max-height:100vh;overflow:hidden;background:#08113f;box-shadow:0 0 40px #000}
+canvas{display:block;width:100%;height:100%;background:#08113f}
+.layer{position:absolute;inset:0}
+.hidden{display:none!important}
+#home{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7% 8%;background:linear-gradient(#07113dcc,#170c48dd),url('Assets/GamePlay Background.png') center/cover no-repeat;text-align:center}
+#logo{width:92%;max-height:23%;object-fit:contain;filter:drop-shadow(0 5px 0 #05051d)}
+#hero{width:48%;max-height:35%;object-fit:contain;margin:-1% 0 1%;filter:drop-shadow(0 8px 4px #0008)}
+.menuBtn{width:min(78%,320px);border:3px solid #fff9;border-radius:16px;padding:14px 18px;margin:7px 0;color:white;font-size:clamp(17px,4.3vw,25px);font-weight:900;letter-spacing:1.5px;text-shadow:0 2px 0 #000;background:linear-gradient(#ff567d,#ac1648);box-shadow:0 6px 0 #64102e,0 9px 16px #0008}
+.menuBtn.secondary{background:linear-gradient(#33c9ef,#1361ad);box-shadow:0 6px 0 #0c356a,0 9px 16px #0008}
+.menuBtn:active,.control:active{transform:translateY(3px);box-shadow:0 2px 0 #111}
+#optionsPanel{display:flex;align-items:center;justify-content:center;background:#02051cbb;backdrop-filter:blur(5px);padding:8%}
+.panel{width:100%;background:#11194eee;border:3px solid #70ddff;border-radius:20px;padding:22px;text-align:center;box-shadow:0 12px 40px #000}
+.panel h2{margin:0 0 16px;color:#ffd65c}.row{display:flex;justify-content:space-between;align-items:center;margin:14px 0;font-weight:800}.toggle{border:2px solid #fff8;border-radius:999px;padding:9px 16px;color:white;background:#1a74b9;font-weight:900;min-width:90px}.toggle.off{background:#5e6174}
+#hud{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 8px) 10px 0;pointer-events:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:6px;text-shadow:0 2px 3px #000;font-weight:900;font-size:clamp(11px,3vw,16px)}
+#score{text-align:left}#wave{text-align:center;color:#ffe26e}#lives{text-align:right}
+#powerWrap{grid-column:1/4;height:10px;border:2px solid #fff9;border-radius:99px;background:#05091dcc;overflow:hidden;margin-top:4px}#powerBar{height:100%;width:0;background:linear-gradient(90deg,#39dfff,#ffe65b,#ff5f8a)}
+#banner{position:absolute;left:8%;right:8%;top:17%;text-align:center;font-size:clamp(22px,7vw,40px);font-weight:1000;color:#fff5a6;text-shadow:0 4px 0 #6e1f5e,0 0 14px #fff;pointer-events:none;opacity:0;transition:opacity .2s}
+#controls{position:absolute;inset:0;pointer-events:none}
+.control{pointer-events:auto;position:absolute;width:68px;height:52px;border:2px solid #fff9;border-radius:14px;color:#fff;font-weight:1000;font-size:11px;line-height:1.05;text-shadow:0 2px #000;box-shadow:0 4px 0 #071a39,0 6px 10px #0008;display:grid;place-items:center;padding:3px;background:linear-gradient(#3bc8ed,#1767b6);user-select:none;-webkit-user-select:none}
+.control .icon{display:block;font-size:23px;line-height:20px}.control.web{left:10px;bottom:calc(env(safe-area-inset-bottom) + 12px);background:linear-gradient(#e94379,#9d1748);box-shadow:0 4px 0 #58102b,0 6px 10px #0008}.control.jump{right:10px;bottom:calc(env(safe-area-inset-bottom) + 12px)}.control.slide{right:10px;bottom:calc(env(safe-area-inset-bottom) + 72px);background:linear-gradient(#ffc54d,#ad5b12);box-shadow:0 4px 0 #65330a,0 6px 10px #0008}
+#soundBtn{position:absolute;right:8px;top:calc(env(safe-area-inset-top) + 45px);width:36px;height:36px;border-radius:50%;border:2px solid #fff7;background:#10194bcc;color:white;font-size:17px;z-index:5}
+#gameOver{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:9%;background:linear-gradient(#050725aa,#120522dd),url('Assets/GAMEOVER Background.png') center/cover no-repeat}
+#gameOver img{width:78%;max-height:28%;object-fit:contain}.final{font-size:clamp(20px,6vw,34px);font-weight:1000;margin:12px}.tiny{font-size:12px;opacity:.85;margin-top:10px}
+@media(max-width:380px){.control{width:60px;height:46px;border-radius:12px}.control .icon{font-size:20px}.control.slide{bottom:calc(env(safe-area-inset-bottom) + 65px)}}
+</style>
+</head>
+<body>
+<div id="shell">
+  <canvas id="game" width="540" height="960" aria-label="Miko's Super Spider Adventure"></canvas>
+  <section id="home" class="layer">
+    <img id="logo" src="Assets/MikosSuperGame Logo.png" alt="Miko's Super Spider Adventure" />
+    <img id="hero" src="Assets/MIKO-Front.png" alt="Miko" />
+    <button id="playBtn" class="menuBtn">▶ PLAY</button>
+    <button id="optionsBtn" class="menuBtn secondary">⚙ OPTIONS</button>
+    <div class="tiny">Jump • Slide • Shoot webs • Beat the bots!</div>
+  </section>
+  <section id="optionsPanel" class="layer hidden">
+    <div class="panel">
+      <h2>OPTIONS</h2>
+      <div class="row"><span>Music</span><button id="musicToggle" class="toggle">ON</button></div>
+      <div class="row"><span>Sound Effects</span><button id="sfxToggle" class="toggle">ON</button></div>
+      <button id="closeOptions" class="menuBtn secondary">BACK</button>
+    </div>
+  </section>
+  <div id="hud" class="hidden"><div id="score">SCORE 0</div><div id="wave">WAVE 1</div><div id="lives">❤❤❤</div><div id="powerWrap"><div id="powerBar"></div></div></div>
+  <div id="banner"></div>
+  <button id="soundBtn" class="hidden" aria-label="Toggle sound">🔊</button>
+  <div id="controls" class="hidden">
+    <button id="webBtn" class="control web"><span><b class="icon">🕸</b>WEB</span></button>
+    <button id="slideBtn" class="control slide"><span><b class="icon">⇩</b>SLIDE</span></button>
+    <button id="jumpBtn" class="control jump"><span><b class="icon">⇧</b>JUMP</span></button>
+  </div>
+  <section id="gameOver" class="layer hidden">
+    <img src="Assets/GameOver.png" alt="Game over" />
+    <div id="finalScore" class="final">SCORE 0</div>
+    <button id="retryBtn" class="menuBtn">↻ TRY AGAIN</button>
+    <button id="homeBtn" class="menuBtn secondary">⌂ HOME</button>
+  </section>
+</div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), canvas=$('game'),ctx=canvas.getContext('2d');
+const W=canvas.width,H=canvas.height,GROUND=760;
+const asset=n=>`Assets/${n}`;
+const imageNames={bg:'GamePlay Background.png',run:'MIKO-Running.png',side:'MIKO-Side.png',jump:'Miko-JUMP.png',hurt:'MIKO-Hurt.png',basic:'10.png',zig:'11.png',boss:'12.png',coin:'Spider Coin.png',meter:'Power Meter Collectible.png',web:'Web Shot Projectile.png',enemyShot:'Enemy Attack Projectile.png',vent:'Small Rooftop Vent.png',pipes:'Rooftop Pipes.png',ac:'Large Air-Conditioning Unit.png',dish:'Satellite Dish.png',box:'Electrical Box.png'};
+const imgs={}; for(const [k,v] of Object.entries(imageNames)){imgs[k]=new Image();imgs[k].src=asset(v)}
+const audio={music:new Audio(asset('background_music.WAV')),jump:new Audio(asset('sfx_jump.wav.mp3')),hit:new Audio(asset('sfx_damagetaken.WAV')),gameover:new Audio(asset('gsfx_gameover.WAV')),power:new Audio(asset('sfx_power_ready.wav.mp3'))};
+audio.music.loop=true;audio.music.volume=.32; Object.values(audio).forEach(a=>a.preload='auto');
+let musicOn=true,sfxOn=true,state='home',last=0,raf=0;
+let player,objects,shots,enemyShots,particles,score,lives,power,wave,waveTime,loop,spawnClock,coinClock,boss,bannerTimer,powerMode,powerTime,invuln;
+const waveLength=18;
+function reset(){player={x:92,y:GROUND-112,w:76,h:104,vy:0,jumps:0,slide:0,shootCd:0};objects=[];shots=[];enemyShots=[];particles=[];score=0;lives=3;power=0;wave=1;waveTime=0;loop=1;spawnClock=1.5;coinClock=.8;boss=null;bannerTimer=0;powerMode=false;powerTime=0;invuln=0;updateHud()}
+function show(id,on){$(id).classList.toggle('hidden',!on)}
+function playSfx(name){if(!sfxOn)return;const a=audio[name];if(a){a.currentTime=0;a.play().catch(()=>{})}}
+function startGame(){reset();state='playing';show('home',false);show('gameOver',false);show('hud',true);show('controls',true);show('soundBtn',true);if(musicOn)audio.music.play().catch(()=>{});announce('WAVE 1\nROOFTOP TRAINING');last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loopFrame)}
+function goHome(){state='home';audio.music.pause();show('home',true);show('gameOver',false);show('hud',false);show('controls',false);show('soundBtn',false);ctx.clearRect(0,0,W,H);drawBackground(0)}
+function announce(t){$('banner').textContent=t;$('banner').style.whiteSpace='pre-line';$('banner').style.opacity=1;bannerTimer=2}
+function updateHud(){$('score').textContent=`SCORE ${Math.floor(score)}`;$('wave').textContent=`WAVE ${wave}  •  LOOP ${loop}`;$('lives').textContent='❤'.repeat(Math.max(0,lives));$('powerBar').style.width=`${power}%`}
+function jump(){if(state!=='playing'||player.slide>0)return;if(player.jumps<2){player.vy=player.jumps===0?-650:-575;player.jumps++;playSfx('jump')}}
+function slide(){if(state==='playing'&&player.y>=GROUND-player.h-2)player.slide=.65}
+function shoot(){if(state!=='playing'||player.shootCd>0||powerMode)return;player.shootCd=.28;shots.push({x:player.x+player.w-8,y:player.y+36,w:42,h:18,vx:760})}
+function spawnObstacle(speed){const pool=[['vent',62,52],['pipes',78,60],['ac',82,68],['dish',72,65],['box',65,58]],p=pool[Math.floor(Math.random()*pool.length)];objects.push({type:'obstacle',img:p[0],x:W+20,y:GROUND-p[2],w:p[1],h:p[2],vx:-speed,hp:99})}
+function spawnEnemy(speed){let kind='basic';if(wave===3)kind=Math.random()<.25?'zig':'basic';else if(wave>=4)kind=Math.random()<.5?'zig':'basic';const zig=kind==='zig';objects.push({type:'enemy',kind,img:zig?'zig':'basic',x:W+30,y:zig?360+Math.random()*170:430+Math.random()*150,w:zig?86:72,h:zig?72:66,vx:-(zig?speed*.64:speed*.82),hp:zig?2:1,phase:Math.random()*6.28})}
+function spawnCoin(x=W+30,y=300+Math.random()*380){objects.push({type:'coin',img:'coin',x,y,w:34,h:36,vx:-220,hp:1})}
+function spawnPower(){objects.push({type:'power',img:'meter',x:W+30,y:300+Math.random()*300,w:38,h:38,vx:-220,hp:1})}
+function makeBoss(){boss={x:W-128,y:230,w:112,h:100,hp:5,maxHp:5,phase:0,shot:1.1};announce(wave===5?'BOSS APPROACHING!':'FINAL BOSS!')}
+function enterPower(){powerMode=true;powerTime=8;power=0;boss=null;objects=[];enemyShots=[];announce('MIKO POWER!\nCOIN FRENZY');playSfx('power')}
+function nextWave(){waveTime=0;wave++;if(wave>10){wave=1;loop++;announce(`LOOP ${loop}\nFASTER!`)}else announce(wave===5||wave===10?`WAVE ${wave}\nBOSS BATTLE`:`WAVE ${wave}`);if(wave===5||wave===10)makeBoss()}
+function speed(){return 245+(wave-1)*13+(loop-1)*25}
+function rectHit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function damage(){if(invuln>0||powerMode)return;lives--;invuln=1.35;playSfx('hit');updateHud();if(lives<=0)endGame()}
+function endGame(){state='gameover';audio.music.pause();playSfx('gameover');show('hud',false);show('controls',false);show('soundBtn',false);$('finalScore').textContent=`SCORE ${Math.floor(score)}`;show('gameOver',true)}
+function loopFrame(t){if(state!=='playing')return;let dt=Math.min(.034,(t-last)/1000||0);last=t;update(dt);draw(t/1000);raf=requestAnimationFrame(loopFrame)}
+function update(dt){
+ score+=dt*(12+wave*2);waveTime+=dt;spawnClock-=dt;coinClock-=dt;player.shootCd=Math.max(0,player.shootCd-dt);invuln=Math.max(0,invuln-dt);if(player.slide>0)player.slide-=dt;
+ if(bannerTimer>0){bannerTimer-=dt;if(bannerTimer<=0)$('banner').style.opacity=0}
+ player.vy+=1600*dt;player.y+=player.vy*dt;const ph=player.slide>0?62:104;if(player.y>GROUND-ph){player.y=GROUND-ph;player.vy=0;player.jumps=0}player.h=ph;
+ if(powerMode){powerTime-=dt;if(coinClock<=0){coinClock=.18;for(let i=0;i<2;i++)spawnCoin(W+20+i*55,180+Math.random()*500)}if(powerTime<=0){powerMode=false;announce('BACK TO ACTION!');spawnClock=1.2}}
+ else {
+  if((wave===5||wave===10)&&!boss)makeBoss();
+  if(spawnClock<=0&&!boss){const s=speed();if(wave===1||Math.random()<.5)spawnObstacle(s);else spawnEnemy(s);spawnClock=Math.max(.85,1.8-(wave*.06)) + Math.random()*.65}
+  if(coinClock<=0){Math.random()<.82?spawnCoin():spawnPower();coinClock=1.1+Math.random()*1.7}
+  if(waveTime>=waveLength&&!boss)nextWave();
+ }
+ for(const o of objects){o.x+=o.vx*dt;if(o.kind==='zig'){o.phase+=dt*2.4;o.y+=Math.sin(o.phase)*75*dt}}
+ for(const s of shots)s.x+=s.vx*dt;for(const s of enemyShots){s.x+=s.vx*dt;s.y+=s.vy*dt}
+ if(boss&&!powerMode){boss.phase+=dt;boss.y=230+Math.sin(boss.phase*1.5)*95;boss.shot-=dt;if(boss.shot<=0){const dx=player.x-boss.x,dy=(player.y+30)-(boss.y+45),m=Math.hypot(dx,dy)||1;enemyShots.push({x:boss.x,y:boss.y+40,w:34,h:34,vx:dx/m*300,vy:dy/m*300});boss.shot=Math.max(.7,1.45-wave*.035)}}
+ for(const s of shots){for(const o of objects){if(o.type==='enemy'&&!s.dead&&!o.dead&&rectHit(s,o)){s.dead=true;o.hp--;if(o.hp<=0){o.dead=true;score+=o.kind==='zig'?150:80}}}if(boss&&!s.dead&&rectHit(s,boss)){s.dead=true;boss.hp--;score+=100;if(boss.hp<=0){score+=1000;boss=null;announce('BOSS DEFEATED!');waveTime=waveLength-.5}}}
+ for(const o of objects){if(o.dead)continue;if(rectHit(player,o)){if(o.type==='coin'){o.dead=true;score+=25}else if(o.type==='power'){o.dead=true;power=Math.min(100,power+25);if(power>=100)enterPower()}else{damage();o.dead=true}}}
+ for(const s of enemyShots){if(!s.dead&&rectHit(player,s)){s.dead=true;damage()}}
+ objects=objects.filter(o=>!o.dead&&o.x>-140);shots=shots.filter(s=>!s.dead&&s.x<W+80);enemyShots=enemyShots.filter(s=>!s.dead&&s.x>-80&&s.y>-80&&s.y<H+80);
+ updateHud()
+}
+function fitDraw(img,x,y,w,h,alpha=1){if(!img||!img.complete)return;ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(img,x,y,w,h);ctx.restore()}
+function drawBackground(t){if(imgs.bg.complete)ctx.drawImage(imgs.bg,0,0,W,H);else{ctx.fillStyle='#081447';ctx.fillRect(0,0,W,H)}ctx.fillStyle='#0c1023';ctx.fillRect(0,GROUND,W,H-GROUND)}
+function draw(t){drawBackground(t);if(powerMode){ctx.fillStyle='#ffe45a33';ctx.fillRect(0,0,W,H)}
+ for(const o of objects){fitDraw(imgs[o.img],o.x,o.y,o.w,o.h);if(o.type==='enemy'&&o.hp>1){ctx.fillStyle='#fff';ctx.font='bold 16px sans-serif';ctx.fillText('♥'.repeat(o.hp),o.x,o.y-5)}}
+ for(const s of shots)fitDraw(imgs.web,s.x,s.y,s.w,s.h);for(const s of enemyShots)fitDraw(imgs.enemyShot,s.x,s.y,s.w,s.h);
+ if(boss){fitDraw(imgs.boss,boss.x,boss.y,boss.w,boss.h);ctx.fillStyle='#280514';ctx.fillRect(W-160,18,140,14);ctx.fillStyle='#ff355e';ctx.fillRect(W-160,18,140*(boss.hp/boss.maxHp),14);ctx.strokeStyle='#fff';ctx.strokeRect(W-160,18,140,14)}
+ const pimg=invuln>0?imgs.hurt:(player.vy!==0?imgs.jump:(player.slide>0?imgs.side:imgs.run));fitDraw(pimg,player.x,player.y,player.w,player.h,invuln>0&&Math.floor(invuln*12)%2?0.35:1)
+}
+$('playBtn').addEventListener('click',startGame);$('retryBtn').addEventListener('click',startGame);$('homeBtn').addEventListener('click',goHome);$('optionsBtn').addEventListener('click',()=>show('optionsPanel',true));$('closeOptions').addEventListener('click',()=>show('optionsPanel',false));
+function setToggle(btn,on){btn.textContent=on?'ON':'OFF';btn.classList.toggle('off',!on)}
+$('musicToggle').addEventListener('click',()=>{musicOn=!musicOn;setToggle($('musicToggle'),musicOn);if(!musicOn)audio.music.pause();else if(state==='playing')audio.music.play().catch(()=>{})});$('sfxToggle').addEventListener('click',()=>{sfxOn=!sfxOn;setToggle($('sfxToggle'),sfxOn)});
+$('soundBtn').addEventListener('click',()=>{musicOn=!musicOn;sfxOn=musicOn;$('soundBtn').textContent=musicOn?'🔊':'🔇';setToggle($('musicToggle'),musicOn);setToggle($('sfxToggle'),sfxOn);if(!musicOn)audio.music.pause();else audio.music.play().catch(()=>{})});
+function press(el,fn){el.addEventListener('pointerdown',e=>{e.preventDefault();fn()})}press($('jumpBtn'),jump);press($('slideBtn'),slide);press($('webBtn'),shoot);
+window.addEventListener('keydown',e=>{if(['Space','ArrowUp'].includes(e.code)){e.preventDefault();jump()}else if(['ArrowDown','KeyS'].includes(e.code)){e.preventDefault();slide()}else if(['KeyX','KeyF'].includes(e.code)){e.preventDefault();shoot()}});
+reset();drawBackground(0);
+</script>
+</body>
+</html>
