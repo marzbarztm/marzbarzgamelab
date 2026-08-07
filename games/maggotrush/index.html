@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<title>Rotted Threadz: Maggot Rush — Test Build</title>
+<style>
+:root{--red:#8e1010;--green:#8aff35;--white:#eee;--black:#050505;--gray:#181818}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,Helvetica,sans-serif;color:#fff}
+body{display:grid;place-items:center}
+#game{position:relative;width:min(100vw,562.5px);height:min(100vh,1000px);aspect-ratio:9/16;background:#070707 center/cover no-repeat;overflow:hidden;touch-action:none;user-select:none}
+#game::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px);mix-blend-mode:screen;z-index:50}
+.screen{position:absolute;inset:0;display:none}.screen.active{display:block}
+#home{background:url('bg_home.png') center/cover no-repeat;z-index:5}
+#home .logo{position:absolute;left:50%;top:11%;transform:translateX(-50%);width:82%;max-height:30%;object-fit:contain;filter:drop-shadow(0 8px 10px #000)}
+#startPopup{position:absolute;left:50%;bottom:18%;transform:translateX(-50%);width:78%;animation:pulse 1.3s infinite;cursor:pointer}
+#homeNote{position:absolute;bottom:7%;left:0;right:0;text-align:center;font-size:12px;letter-spacing:2px;opacity:.72}
+@keyframes pulse{50%{transform:translateX(-50%) scale(1.045);filter:brightness(1.15)}}
+#play{background:url('bg_gameplay_01.png') center/cover no-repeat}
+.hud{position:absolute;top:env(safe-area-inset-top,0);left:0;right:0;height:105px;padding:12px 12px 0;z-index:20;pointer-events:none}
+.toprow{display:flex;align-items:flex-start;gap:5px}.panel{position:relative;background:center/100% 100% no-repeat;padding:10px 10px 8px;min-width:78px;height:55px;text-align:center;display:flex;flex-direction:column;justify-content:center}.panel.scorePanel{background-image:url('hud_score_panel.png');min-width:100px}.panel.comboPanel{background-image:url('hud_combo_panel.png');min-width:88px}.panel.stagePanel{background-image:url('hud_counter_panel.png');min-width:78px}
+.panel b{display:block;font-size:19px;line-height:1}.panel span{font-size:9px;letter-spacing:1px;opacity:.7}
+#pauseBtn,#soundBtn{pointer-events:auto;margin-left:auto;width:40px;height:40px;object-fit:contain;cursor:pointer}.toprow #soundBtn{margin-left:0}
+#rotWrap{position:absolute;left:12px;right:12px;top:66px;height:23px}.rotFrame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}.rotInner{position:absolute;left:3.5%;right:3.5%;top:28%;bottom:27%;overflow:hidden}.rotFill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#6eff2b,#cbff37,#d92717);transition:width .15s}
+#arena{position:absolute;inset:100px 0 112px;overflow:hidden}
+.sprite{position:absolute;touch-action:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.6));z-index:10}.fly{width:70px;height:70px;object-fit:contain}.maggot{width:58px;height:58px;object-fit:contain}.fx{position:absolute;width:80px;height:80px;pointer-events:none;z-index:15;animation:fx .42s ease-out forwards}@keyframes fx{from{transform:scale(.55);opacity:1}to{transform:scale(1.35);opacity:0}}
+#tray{position:absolute;bottom:max(10px,env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%);width:94%;height:92px;z-index:25;background:url('hud_powerup_tray.png') center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;gap:4%}
+.pu{position:relative;width:18%;aspect-ratio:1;border:0;background:none;padding:0;cursor:pointer}.pu img{width:100%;height:100%;object-fit:contain}.pu.disabled{filter:grayscale(.8) brightness(.45)}.pu.empty{opacity:.33}.pu .charge{position:absolute;right:2px;bottom:2px;background:#000;border:1px solid #fff;font-size:10px;padding:1px 4px;border-radius:8px}
+#banner{position:absolute;left:50%;top:36%;transform:translate(-50%,-50%);width:86%;z-index:40;pointer-events:none;display:none;filter:drop-shadow(0 8px 10px #000)}
+#banner.show{display:block;animation:banner .8s ease both}@keyframes banner{0%{opacity:0;transform:translate(-50%,-50%) scale(.65)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}100%{opacity:0;transform:translate(-50%,-50%) scale(.98)}}
+#pauseOverlay,#results{position:absolute;inset:0;background:rgba(0,0,0,.78);z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}#results{background:linear-gradient(rgba(0,0,0,.50),rgba(0,0,0,.60)),url('bg_results.png') center/cover no-repeat}#pauseOverlay.show,#results.show{display:flex}
+#pauseOverlay img,#results .headline{width:76%;max-height:30%;object-fit:contain}.iconBtn{width:74px;height:74px;border:0;background:none;padding:4px}.iconBtn img{width:100%;height:100%;object-fit:contain}.stats{width:78%;background:rgba(0,0,0,.72);border:2px solid rgba(255,255,255,.25);padding:14px;text-align:center;line-height:1.9}.stats strong{font-size:24px}
+#powerStage{position:absolute;inset:0;z-index:35;pointer-events:none;display:none}.power-actor{position:absolute;object-fit:contain;filter:drop-shadow(0 5px 8px #000)}
+.dualityTarget{pointer-events:auto!important;cursor:pointer}
+#debug{position:absolute;right:6px;bottom:108px;z-index:80;font-size:9px;background:rgba(0,0,0,.55);padding:3px 5px;opacity:.6;display:none}
+@media(max-height:650px){.hud{transform:scale(.85);transform-origin:top center}#tray{height:78px}.fly{width:58px;height:58px}.maggot{width:48px;height:48px}}
+</style>
+</head>
+<body>
+<div id="game">
+  <section id="home" class="screen active">
+    <img class="logo" src="logo_maggot_rush.png" alt="Maggot Rush">
+    <img id="startPopup" src="popup_push_to_start.png" alt="Push to start">
+    <div id="homeNote">TEST BUILD • MUSIC COMING LATER</div>
+  </section>
+  <section id="play" class="screen">
+    <div class="hud">
+      <div class="toprow">
+        <div class="panel scorePanel"><b id="score">0</b><span>SCORE</span></div>
+        <div class="panel comboPanel"><b id="combo">x1</b><span>COMBO</span></div>
+        <div class="panel stagePanel"><b id="stage">1</b><span>STAGE</span></div>
+        <img id="pauseBtn" src="ui_pause.png" alt="pause">
+        <img id="soundBtn" src="ui_sound_on.png" alt="sound">
+      </div>
+      <div id="rotWrap"><div class="rotInner"><div class="rotFill" id="rotFill"></div></div><img class="rotFrame" src="hud_rot_meter_frame.png"></div>
+    </div>
+    <div id="arena"></div>
+    <img id="banner" src="popup_fly_rush.png">
+    <div id="powerStage"></div>
+    <div id="tray">
+      <button class="pu empty" data-p="love"><img src="powerup_love_sick.png"><span class="charge">0</span></button>
+      <button class="pu empty" data-p="pollination"><img src="powerup_rotten_pollination.png"><span class="charge">0</span></button>
+      <button class="pu empty" data-p="magnet"><img src="powerup_maggot_magnet.png"><span class="charge">0</span></button>
+      <button class="pu empty" data-p="duality"><img src="powerup_filthy_duality.png"><span class="charge">0</span></button>
+    </div>
+    <div id="pauseOverlay"><img src="popup_paused.png"><button class="iconBtn" id="resumeBtn"><img src="ui_resume.png"></button><button class="iconBtn" id="homeBtn"><img src="ui_home.png"></button></div>
+    <div id="results"><img class="headline" id="resultHeadline" src="popup_infestation_complete.png"><div class="stats" id="resultStats"></div><button class="iconBtn" id="retryBtn"><img src="ui_retry.png"></button><button class="iconBtn" id="resultHomeBtn"><img src="ui_home.png"></button></div>
+    <div id="debug"></div>
+  </section>
+</div>
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const game=$('#game'), home=$('#home'), play=$('#play'), arena=$('#arena'), banner=$('#banner'), powerStage=$('#powerStage');
+const audioNames=['ui_tap','ui_confirm','ui_back','ui_error','ui_transition','fly_buzz_loop','fly_spawn','fly_hit','fly_pop','fly_heavy_pop','maggot_drop','maggot_crawl_loop','maggot_warning','maggot_split','maggot_pop','combo_rise','combo_break','score_tick','score_bonus','love_sick_activate','love_sick_wave','pollination_activate','pollination_freeze','magnet_activate','magnet_pull','duality_activate','duality_split','rot_warning'];
+const sounds={}; audioNames.forEach(n=>{let a=new Audio('Audio/'+n+'.mp3'); a.preload='auto'; if(n.includes('loop'))a.loop=true; sounds[n]=a});
+let soundOn=true; const sfx=(n,vol=.7)=>{if(!soundOn||!sounds[n])return;try{const a=sounds[n].cloneNode();a.volume=vol;a.play().catch(()=>{})}catch(e){}};
+// Music intentionally omitted from this test build. Add music_menu/gameplay/rush/results later.
+const flyFrames={basic:['fly_basic_flap_01.png','fly_basic_flap_02.png','fly_basic_flap_03.png','fly_basic_flap_04.png'],fast:['fly_fast_flap_01.png','fly_fast_flap_02.png','fly_fast_flap_03.png','fly_fast_flap_04.png'],carrier:['fly_carrier_flap_01.png','fly_carrier_flap_02.png','fly_carrier_flap_03.png','fly_carrier_flap_04.png'],heavy:['fly_heavy_flap_01.png','fly_heavy_flap_02.png','fly_heavy_flap_03.png','fly_heavy_flap_04.png'],boss:['fly_boss_flap_01.png','fly_boss_flap_02.png','fly_boss_flap_03.png']};
+let state={running:false,paused:false,score:0,combo:1,hits:0,misses:0,flies:0,maggots:0,rot:0,stage:1,kills:0,activePower:null,powers:{love:0,pollination:0,magnet:0,duality:0},started:0};
+let timers=[]; function later(fn,ms){let id=setTimeout(fn,ms);timers.push(id);return id} function clearTimers(){timers.forEach(clearTimeout);timers=[]}
+function showScreen(which){home.classList.toggle('active',which==='home');play.classList.toggle('active',which==='play')}
+function updateHUD(){ $('#score').textContent=state.score; $('#combo').textContent='x'+state.combo; $('#stage').textContent=state.stage; $('#rotFill').style.width=Math.min(100,state.rot)+'%'; $$('.pu').forEach(b=>{let p=b.dataset.p,c=state.powers[p];b.classList.toggle('empty',!c);b.classList.toggle('disabled',!!state.activePower&&state.activePower!==p);b.querySelector('.charge').textContent=c}); }
+function reset(){clearTimers(); arena.innerHTML='';powerStage.innerHTML='';powerStage.style.display='none';$('#results').classList.remove('show');$('#pauseOverlay').classList.remove('show');state={running:true,paused:false,score:0,combo:1,hits:0,misses:0,flies:0,maggots:0,rot:0,stage:1,kills:0,activePower:null,powers:{love:0,pollination:0,magnet:0,duality:0},started:Date.now()}; updateHUD(); spawnLoop(); maggotLoop(); stageLoop(); sfx('ui_transition')}
+function rand(a,b){return Math.random()*(b-a)+a} function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function spawnFly(type){if(!state.running||state.paused)return; const el=document.createElement('img'); el.className='sprite fly'; el.dataset.type=type; let frames=flyFrames[type]||flyFrames.basic; el.src=frames[0]; let x=rand(8,arena.clientWidth-78),y=rand(15,Math.max(40,arena.clientHeight-120));el.style.left=x+'px';el.style.top=y+'px';arena.appendChild(el);state.flies++;
+ let frame=0,dir=Math.random()<.5?-1:1,speed=type==='fast'?1.8:type==='heavy'?0.65:1.05; let hp=type==='heavy'?2:type==='boss'?4:1; let alive=true;
+ let anim=setInterval(()=>{if(!alive||state.paused)return; frame=(frame+1)%frames.length;el.src=frames[frame]},90); let move=setInterval(()=>{if(!alive||state.paused)return; x+=dir*speed*3;y+=Math.sin(Date.now()/250+x)*1.4;if(x<0||x>arena.clientWidth-70)dir*=-1;el.style.left=x+'px';el.style.top=y+'px'},35);
+ const kill=()=>{if(!alive)return;alive=false;clearInterval(anim);clearInterval(move);el.remove();comboHit(type);fx(x,y,type==='heavy'?'fx_fly_pop_02.png':'fx_fly_pop_01.png');sfx(type==='heavy'?'fly_heavy_pop':'fly_pop');};
+ el.addEventListener('pointerdown',e=>{e.preventDefault();if(state.paused||!state.running)return; hp--;sfx('fly_hit',.45);if(hp<=0)kill();else{el.src=type==='boss'?'fly_boss_hit.png':`fly_${type}_hit.png`;later(()=>alive&&(el.src=frames[frame]),100)}});
+ later(()=>{if(alive){alive=false;clearInterval(anim);clearInterval(move);el.remove();state.combo=1;state.misses++;updateHUD();sfx('combo_break',.35)}}, type==='fast'?3100:type==='heavy'?5200:4200);
+ }
+function comboHit(type){state.hits++;state.kills++;state.combo=Math.min(20,state.combo+1);let base=type==='fast'?150:type==='carrier'?175:type==='heavy'?300:type==='boss'?800:100;state.score+=base*state.combo;sfx(state.combo%5===0?'combo_rise':'score_tick',.35); if(state.kills%12===0)grantPower(); updateHUD();}
+function spawnLoop(){if(!state.running)return; if(!state.paused){let r=Math.random(),type=state.stage>=4&&r>.93?'heavy':state.stage>=3&&r>.78?'carrier':state.stage>=2&&r>.58?'fast':'basic';spawnFly(type)}later(spawnLoop,Math.max(430,1050-state.stage*85))}
+function spawnMaggot(x=rand(10,arena.clientWidth-65),y=arena.clientHeight-rand(65,130)){if(!state.running||state.paused)return;const el=document.createElement('img');el.className='sprite maggot';el.src='maggot_crawl_01.png';el.style.left=x+'px';el.style.top=y+'px';arena.appendChild(el);state.maggots++;sfx('maggot_drop',.35);let alive=true,frame=0;let anim=setInterval(()=>{if(state.paused||!alive)return;frame=(frame+1)%4;el.src=`maggot_crawl_0${frame+1}.png`},130);let warning=later(()=>{if(alive){el.src='maggot_warning_01.png';sfx('maggot_warning',.45)}},2100);let split=later(()=>{if(!alive)return;alive=false;clearInterval(anim);el.remove();sfx('maggot_split',.5);state.rot+=10;for(let i=0;i<3;i++)spawnMaggot(Math.max(0,Math.min(arena.clientWidth-60,x+rand(-35,35))),Math.max(0,Math.min(arena.clientHeight-60,y+rand(-25,20))));if(state.rot>=100)return endGame(false);updateHUD()},3000);
+ el.addEventListener('pointerdown',e=>{e.preventDefault();if(!alive||state.paused)return;alive=false;clearInterval(anim);clearTimeout(warning);clearTimeout(split);el.remove();state.score+=75*state.combo;state.hits++;fx(x,y,'fx_maggot_pop.png');sfx('maggot_pop',.45);updateHUD()});}
+function maggotLoop(){if(!state.running)return;if(!state.paused)spawnMaggot();later(maggotLoop,Math.max(2500,5200-state.stage*300))}
+function stageLoop(){if(!state.running)return;later(()=>{if(!state.running)return;state.stage++;showBanner('popup_stage_clear.png');if(state.stage%3===0)flyRush();updateHUD();stageLoop()},25000)}
+function grantPower(){let options=Object.keys(state.powers).filter(k=>state.powers[k]<1);if(!options.length)return;let p=pick(options);state.powers[p]=1;updateHUD();sfx('score_bonus',.45)}
+function showBanner(src,hold=850){banner.src=src;banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');later(()=>banner.classList.remove('show'),hold)}
+function fx(x,y,src){let im=document.createElement('img');im.className='fx';im.src=src;im.style.left=x+'px';im.style.top=y+'px';arena.appendChild(im);later(()=>im.remove(),450)}
+function flyRush(){showBanner('popup_fly_rush.png',1000);let old=play.style.backgroundImage;play.style.backgroundImage="url('bg_fly_rush.png')";for(let i=0;i<12;i++)later(()=>spawnFly('basic'),i*130);later(()=>play.style.backgroundImage=old||"url('bg_gameplay_01.png')",4200)}
+function usePower(p){if(!state.running||state.paused||state.activePower||!state.powers[p])return;sfx('ui_confirm');state.powers[p]=0;state.activePower=p;updateHUD();const map={love:'popup_love_sick.png',pollination:'popup_rotten_pollination.png',magnet:'popup_maggot_magnet.png',duality:'popup_filthy_duality.png'};showBanner(map[p],1000);if(p==='love')lovePower();if(p==='pollination')pollinationPower();if(p==='magnet')magnetPower();if(p==='duality')dualityPower();}
+function finishPower(ms=2500){later(()=>{state.activePower=null;powerStage.innerHTML='';powerStage.style.display='none';updateHUD()},ms)}
+function lovePower(){sfx('love_sick_activate');powerStage.style.display='block';let a=document.createElement('img');a.className='power-actor';a.src='love_sick_angel_05.png';a.style.width='42%';a.style.left='-40%';a.style.top='28%';powerStage.appendChild(a);let t=0,m=setInterval(()=>{t+=2.8;a.style.left=(-40+t)+'%';if(t>150)clearInterval(m)},25);later(()=>{sfx('love_sick_wave');[...arena.querySelectorAll('.fly,.maggot')].forEach((e,i)=>later(()=>{e.dispatchEvent(new PointerEvent('pointerdown'))},i*20))},600);finishPower(2600)}
+function pollinationPower(){sfx('pollination_activate');powerStage.style.display='block';let a=document.createElement('img');a.className='power-actor';a.src='pollination_bloom_06.png';a.style.width='45%';a.style.left='27%';a.style.top='30%';powerStage.appendChild(a);sfx('pollination_freeze',.5);let sprites=[...arena.querySelectorAll('.sprite')];sprites.forEach(e=>e.style.filter='brightness(1.5) saturate(.4) drop-shadow(0 0 8px white)');later(()=>sprites.forEach(e=>e.style.filter=''),3300);finishPower(3500)}
+function magnetPower(){sfx('magnet_activate');powerStage.style.display='block';let a=document.createElement('img');a.className='power-actor';a.src='magnet_pulse_03.png';a.style.width='36%';a.style.left='32%';a.style.top='38%';powerStage.appendChild(a);let mags=[...arena.querySelectorAll('.maggot')];sfx('magnet_pull',.55);mags.forEach((e,i)=>{e.style.transition='all .7s ease-in';e.style.left='45%';e.style.top='48%';later(()=>e.dispatchEvent(new PointerEvent('pointerdown')),800+i*25)});finishPower(1800)}
+function dualityPower(){sfx('duality_activate');powerStage.style.display='block';let count=1,score=0;function render(){powerStage.innerHTML='';let n=Math.min(count,64);for(let i=0;i<n;i++){let a=document.createElement('img');a.className='power-actor dualityTarget';a.src=count===1?'duality_maggot_idle.png':'duality_maggot_active.png';let size=Math.max(6,22-Math.log2(n)*2);a.style.width=size+'%';a.style.left=rand(3,92-size/2)+'%';a.style.top=rand(18,72)+'%';a.addEventListener('pointerdown',()=>{if(state.activePower!=='duality')return;count*=2;score+=count*25;sfx('duality_split',.35);render()});powerStage.appendChild(a)}}render();later(()=>{state.score+=score;sfx('score_bonus');fx(arena.clientWidth/2-40,arena.clientHeight/2-40,'fx_mass_pop.png');state.activePower=null;powerStage.innerHTML='';powerStage.style.display='none';updateHUD()},7000)}
+function togglePause(force){if(!state.running)return;state.paused=force===undefined?!state.paused:force;$('#pauseOverlay').classList.toggle('show',state.paused);$('#pauseBtn').src=state.paused?'ui_resume.png':'ui_pause.png';sfx('ui_tap',.35)}
+function endGame(win=false){if(!state.running)return;state.running=false;state.paused=true;let acc=state.hits+state.misses?Math.round(state.hits/(state.hits+state.misses)*100):100;$('#resultHeadline').src=win?'popup_stage_clear.png':'popup_infestation_complete.png';$('#resultStats').innerHTML=`<strong>${state.score}</strong><br>SCORE<br>${state.kills} FLY KILLS • ${state.maggots} MAGGOTS<br>${acc}% ACCURACY • STAGE ${state.stage}`;$('#results').classList.add('show');sfx('ui_transition')}
+$('#startPopup').addEventListener('pointerdown',()=>{showScreen('play');reset()});$('#pauseBtn').addEventListener('pointerdown',()=>togglePause());$('#resumeBtn').addEventListener('pointerdown',()=>togglePause(false));$('#homeBtn').addEventListener('pointerdown',()=>{state.running=false;clearTimers();showScreen('home');sfx('ui_back')});$('#retryBtn').addEventListener('pointerdown',reset);$('#resultHomeBtn').addEventListener('pointerdown',()=>{state.running=false;clearTimers();showScreen('home')});$('#soundBtn').addEventListener('pointerdown',()=>{soundOn=!soundOn;$('#soundBtn').src=soundOn?'ui_sound_on.png':'ui_sound_off.png';if(!soundOn)Object.values(sounds).forEach(a=>a.pause());sfx('ui_tap')});$$('.pu').forEach(b=>b.addEventListener('pointerdown',()=>usePower(b.dataset.p)));
+window.addEventListener('blur',()=>state.running&&togglePause(true));
+// Hide browser broken-image icons if an upload is incomplete; log the exact filename instead.
+document.querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{console.error('Missing graphic:',img.getAttribute('src'));img.style.visibility='hidden'}));
+const criticalAssets=['logo_maggot_rush.png','popup_push_to_start.png','ui_pause.png','ui_sound_on.png','hud_rot_meter_frame.png','hud_powerup_tray.png','powerup_love_sick.png','powerup_rotten_pollination.png','powerup_maggot_magnet.png','powerup_filthy_duality.png'];
+Promise.all(criticalAssets.map(src=>new Promise(resolve=>{const im=new Image();im.onload=()=>resolve([src,true]);im.onerror=()=>resolve([src,false]);im.src=src;}))).then(results=>{const missing=results.filter(x=>!x[1]).map(x=>x[0]);if(missing.length)console.error('RTD upload incomplete. Missing:',missing.join(', '));});
+})();
+</script>
+</body></html>
