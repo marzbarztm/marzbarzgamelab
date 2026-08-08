@@ -12,19 +12,32 @@ body{display:grid;place-items:center}
 .screen{position:absolute;inset:0;display:none}.screen.active{display:block}
 #home{background:url('bg_home.png') center/cover no-repeat}
 .logo{position:absolute;left:50%;top:8%;transform:translateX(-50%);width:82%;height:auto;object-fit:contain}
-#startPopup{position:absolute;left:50%;bottom:22%;transform:translateX(-50%);width:76%;height:auto;object-fit:contain;cursor:pointer;filter:drop-shadow(0 7px 10px rgba(0,0,0,.7))}
-.homeEmblem{position:absolute;right:5%;top:3%;width:13%;max-width:64px;object-fit:contain;opacity:.9}
-.homeMenu{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);width:82%;display:flex;justify-content:center;align-items:center;gap:12px;z-index:4}
-.menuBtn{min-width:118px;height:46px;padding:0 18px;border:2px solid rgba(255,255,255,.75);background:rgba(4,4,4,.78);color:#fff;font-weight:900;letter-spacing:2px;font-size:13px;box-shadow:0 5px 0 rgba(95,0,0,.82);text-transform:uppercase;cursor:pointer;touch-action:manipulation}
-.menuBtn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(95,0,0,.82)}
-.homeAudio{position:absolute;left:5%;top:3%;display:flex;gap:6px;z-index:4}.homeAudio img{width:38px;height:38px;object-fit:contain;cursor:pointer}
-.homeModes{position:absolute;left:50%;top:58%;transform:translateX(-50%);width:80%;display:flex;justify-content:center;gap:8px;pointer-events:none;opacity:.78}
-.homeModes img{width:48%;height:auto;object-fit:contain}
+
+
+
+
+
+
+
+
 #rules{background:#050505 url('bg_rules.png') center/cover no-repeat;z-index:8}
 .rulesBack{position:absolute;left:5%;top:max(16px,env(safe-area-inset-top));width:54px;height:54px;border:0;background:transparent;padding:0;cursor:pointer;z-index:9}
 .rulesBack img{width:100%;height:100%;object-fit:contain}
 .rulesFallback{position:absolute;left:8%;right:8%;top:17%;bottom:9%;padding:22px;background:rgba(0,0,0,.78);border:2px solid rgba(255,255,255,.22);overflow:auto;text-align:left;line-height:1.45}
 .rulesFallback h2{margin:0 0 12px;font-size:24px;letter-spacing:2px}.rulesFallback b{color:#d4ff72}
+
+#home .logo{position:absolute;left:50%;top:15%;transform:translateX(-50%);width:92%;max-width:520px;max-height:39%;object-fit:contain;filter:drop-shadow(0 10px 14px #000);z-index:3}
+#startPopup{position:absolute;left:50%;top:51%;transform:translateX(-50%);width:64%;max-width:360px;height:auto;object-fit:contain;cursor:pointer;z-index:4;filter:drop-shadow(0 7px 10px rgba(0,0,0,.72));animation:startPulse 1.05s ease-in-out infinite}
+@keyframes startPulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.07);filter:brightness(1.14) drop-shadow(0 8px 12px rgba(0,0,0,.8))}}
+.homeControls{position:absolute;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);width:88%;display:flex;justify-content:center;align-items:center;gap:8%;z-index:6}
+.homeIconBtn{width:82px;height:82px;border:0;background:transparent;padding:0;cursor:pointer;touch-action:manipulation}
+.homeIconBtn img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 5px 6px rgba(0,0,0,.72))}
+.homeIconBtn:active{transform:scale(.94)}
+#rules{background:#050505 url('bg_rules.png') center/cover no-repeat;z-index:8}
+.rulesBack{position:absolute;left:5%;top:max(16px,env(safe-area-inset-top));width:64px;height:64px;border:0;background:transparent;padding:0;cursor:pointer;z-index:9}
+.rulesBack img{width:100%;height:100%;object-fit:contain}
+.rulesFallback{display:none}
+
 #play{background:url('bg_gameplay_01.png') center/cover no-repeat}
 .hud{position:absolute;z-index:20;top:max(8px,env(safe-area-inset-top));left:10px;right:10px;pointer-events:none}
 .top{display:flex;gap:6px;align-items:flex-start}.hudPanel{position:relative;width:29%;height:58px;background:center/100% 100% no-repeat;display:grid;place-items:center;text-align:center}.hudPanel.score{background-image:url('hud_score_panel.png')}.hudPanel.combo{background-image:url('hud_combo_panel.png')}.hudPanel.stage{background-image:url('hud_counter_panel.png');width:21%}.hudPanel b{font-size:18px;line-height:1}.hudPanel small{font-size:8px;letter-spacing:1px;opacity:.8}.hudPanel>div{padding-top:3px}
@@ -44,23 +57,16 @@ body{display:grid;place-items:center}
 <div id="game">
 <section id="home" class="screen active">
 <img class="logo" src="logo_maggot_rush.png" alt="Maggot Rush">
-<img class="homeEmblem" src="logo_rt_emblem.png" alt="">
-<div class="homeAudio"><img id="homeSoundBtn" src="ui_sound_on.png" alt="Sound"><img id="homeMusicBtn" src="ui_music_on.png" alt="Music"></div>
-<div class="homeModes"><img src="popup_fly_frenzy.png" alt=""><img src="popup_maggot_rush.png" alt=""></div>
 <img id="startPopup" src="popup_push_to_start.png" alt="Push to Start">
-<div class="homeMenu"><button id="playBtn" class="menuBtn">PLAY</button><button id="rulesBtn" class="menuBtn">RULES</button></div>
+<div class="homeControls">
+<button id="rulesBtn" class="homeIconBtn" aria-label="Rules"><img src="icon_rules.png" alt="Rules"></button>
+<button id="homeSoundBtn" class="homeIconBtn" aria-label="Sound"><img src="ui_sound_on.png" alt="Sound"></button>
+<button id="homeMusicBtn" class="homeIconBtn" aria-label="Music"><img src="ui_music_on.png" alt="Music"></button>
+</div>
 </section>
 <section id="rules" class="screen">
 <button id="rulesBackBtn" class="rulesBack"><img src="ui_back.png" alt="Back"></button>
-<div id="rulesFallback" class="rulesFallback">
-<h2>HOW TO PLAY</h2>
-<p><b>SWAT FLIES</b> to build score and combos.</p>
-<p><b>KILL MAGGOTS FAST.</b> Any maggot left alive for 3 seconds splits into 3 and spreads across the screen.</p>
-<p><b>FLY FRENZY</b> is a high-speed score rush packed with flies.</p>
-<p><b>MAGGOT RUSH</b> shifts the pressure to scattered, multiplying maggots.</p>
-<p><b>POWER-UPS:</b> Love Sick, Rotten Pollination, Maggot Magnet, and Filthy Duality. You may store them together, but only one can be active at a time.</p>
-<p>Keep the Rot Meter from filling. Survive the infestation and push your high score.</p>
-</div>
+
 </section>
 <section id="play" class="screen">
 <div class="hud"><div class="top"><div class="hudPanel score"><div><b id="score">0</b><br><small>SCORE</small></div></div><div class="hudPanel combo"><div><b id="combo">x1</b><br><small>COMBO</small></div></div><div class="hudPanel stage"><div><b id="stage">1</b><br><small>STAGE</small></div></div><img id="pauseBtn" class="hudIcon" src="ui_pause.png"><img id="soundBtn" class="hudIcon" src="ui_sound_on.png"></div><div id="rot"><div class="rotFillWrap"><div id="rotFill" class="rotFill"></div></div><img class="rotFrame" src="hud_rot_meter_frame.png"></div></div>
@@ -130,7 +136,7 @@ if(a.dead)return;
 a.dead=true;
 actors=actors.filter(x=>x!==a);
 state.kills++;state.hits++;state.combo=Math.min(20,state.combo+1);
-state.score+=(a.type==='boss'?800:a.type==='heavy'?300:a.type==='fast'?150:a.type==='carrier'?175:100)*state.combo;
+state.score+=(a.type==='boss'?10:a.type==='heavy'?4:a.type==='carrier'?3:a.type==='fast'?2:1);
 a.el.src=a.defeat;a.el.style.pointerEvents='none';
 later(()=>a.el.remove(),180);
 sfx(a.type==='heavy'||a.type==='boss'?'fly_heavy_pop':'fly_pop',.30);
@@ -140,7 +146,7 @@ hud();
 }
 function maggotDistanceOK(x,y,minDist=90){return !actors.some(o=>o.kind==='maggot'&&!o.dead&&Math.hypot(o.x-x,o.y-y)<minDist)}
 function findMaggotSpot(preferredX=null,preferredY=null,minDist=90){const maxX=Math.max(1,arena.clientWidth-56),maxY=Math.max(1,arena.clientHeight-56);for(let i=0;i<24;i++){let x=preferredX==null?Math.random()*maxX:Math.max(0,Math.min(maxX,preferredX+(Math.random()*180-90)));let y=preferredY==null?Math.max(20,arena.clientHeight-70-Math.random()*Math.min(220,arena.clientHeight*.38)):Math.max(20,Math.min(maxY,preferredY+(Math.random()*150-75)));if(maggotDistanceOK(x,y,minDist))return{x,y}}return{x:Math.random()*maxX,y:Math.max(20,Math.random()*maxY)}}
-function addMaggot(x=null,y=null,minDist=90){if(!state.running||state.paused||powerPaused)return;const cap=mode==='maggotRush'?MAX_MAGGOTS_RUSH:MAX_MAGGOTS_NORMAL;if(countKind('maggot')>=cap||actors.length>=MAX_TOTAL_ACTORS)return;const spot=findMaggotSpot(x,y,minDist),e=new Image();e.className='sprite maggot';e.src='maggot_crawl_01.png';arena.appendChild(e);const a={kind:'maggot',el:e,x:spot.x,y:spot.y,frame:0,lastFrame:0,born:performance.now(),warned:false,deadline:performance.now()+3000};actors.push(a);state.maggots++;e.addEventListener('pointerdown',ev=>{ev.preventDefault();if(a.dead||state.paused)return;a.dead=true;e.remove();actors=actors.filter(x=>x!==a);state.score+=75*state.combo;state.hits++;addFx(a.x,a.y,'fx_maggot_pop.png');sfx('maggot_pop',.32);hud()})}
+function addMaggot(x=null,y=null,minDist=90){if(!state.running||state.paused||powerPaused)return;const cap=mode==='maggotRush'?MAX_MAGGOTS_RUSH:MAX_MAGGOTS_NORMAL;if(countKind('maggot')>=cap||actors.length>=MAX_TOTAL_ACTORS)return;const spot=findMaggotSpot(x,y,minDist),e=new Image();e.className='sprite maggot';e.src='maggot_crawl_01.png';arena.appendChild(e);const a={kind:'maggot',el:e,x:spot.x,y:spot.y,frame:0,lastFrame:0,born:performance.now(),warned:false,deadline:performance.now()+3000};actors.push(a);state.maggots++;e.addEventListener('pointerdown',ev=>{ev.preventDefault();if(a.dead||state.paused)return;a.dead=true;e.remove();actors=actors.filter(x=>x!==a);state.score+=1;state.hits++;addFx(a.x,a.y,'fx_maggot_pop.png');sfx('maggot_pop',.32);hud()})}
 function splitMaggot(a){if(a.dead)return;a.dead=true;a.el.remove();actors=actors.filter(x=>x!==a);state.rot+=10;sfx('maggot_split',.32);const angles=[-2.35,-1.57,-.78];const spread=105;angles.forEach((ang,i)=>{const tx=a.x+Math.cos(ang)*spread,ty=a.y+Math.sin(ang)*spread;later(()=>{if(countKind('maggot')<(mode==='maggotRush'?MAX_MAGGOTS_RUSH:MAX_MAGGOTS_NORMAL))addMaggot(tx,ty,105)},i*80)});hud();if(state.rot>=100)endGame()}
 function weightedPower(){
 let r=Math.random(),sum=0;for(const [p,w] of POWER_WEIGHTS){sum+=w;if(r<=sum)return p}return'magnet'
@@ -249,7 +255,7 @@ function endGame(){state.running=false;state.paused=true;const acc=state.hits+st
 function pause(force){if(!state.running)return;state.paused=force===undefined?!state.paused:force;$('#pauseOverlay').classList.toggle('show',state.paused);$('#pauseBtn').src=state.paused?'ui_resume.png':'ui_pause.png';sfx('ui_tap',.2)}
 const startGame=()=>{screen('play');reset()};
 $('#startPopup').addEventListener('pointerdown',startGame);
-$('#playBtn').addEventListener('pointerdown',startGame);
+
 $('#rulesBtn').addEventListener('pointerdown',()=>{screen('rules');sfx('ui_tap',.2)});
 $('#rulesBackBtn').addEventListener('pointerdown',()=>{screen('home');sfx('ui_back',.22)});
 function updateAudioIcons(){
@@ -261,7 +267,7 @@ $('#homeMusicBtn').addEventListener('pointerdown',()=>{musicOn=!musicOn;if(!musi
 $('#pauseBtn').addEventListener('pointerdown',()=>pause());$('#resumeBtn').addEventListener('pointerdown',()=>pause(false));$('#homeBtn').addEventListener('pointerdown',()=>{state.running=false;clearAll();screen('home')});$('#retryBtn').addEventListener('pointerdown',reset);$('#resultHomeBtn').addEventListener('pointerdown',()=>{state.running=false;clearAll();screen('home')});$('#soundBtn').addEventListener('pointerdown',()=>{soundOn=!soundOn;updateAudioIcons()});$$('.pu').forEach(b=>b.addEventListener('pointerdown',()=>usePower(b.dataset.p)));window.addEventListener('blur',()=>state.running&&pause(true));
 ['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 document.addEventListener('error',e=>{if(e.target?.tagName==='IMG'){console.error('Missing graphic:',e.target.getAttribute('src'));e.target.style.visibility='hidden'}},true);
-const rulesProbe=new Image();rulesProbe.onload=()=>{$('#rulesFallback').style.display='none'};rulesProbe.onerror=()=>{$('#rulesFallback').style.display='block'};rulesProbe.src='bg_rules.png';
+
 updateAudioIcons();
 })();
 </script>
