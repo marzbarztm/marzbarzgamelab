@@ -40,7 +40,7 @@ body{display:grid;place-items:center}
 
 #play{background:url('bg_gameplay_01.png') center/cover no-repeat}
 .hud{position:absolute;z-index:30;top:max(8px,env(safe-area-inset-top));left:10px;right:10px;pointer-events:none}
-.top{display:flex;gap:8px;align-items:flex-start;min-height:58px}.hudPanel{position:relative;width:40%;height:58px;background:center/100% 100% no-repeat;display:grid;place-items:center;text-align:center}.hudPanel.score{background-image:url('hud_score_panel.png')}.hudPanel b{font-size:20px;line-height:1}.hudPanel small{font-size:8px;letter-spacing:1px;opacity:.8}.hudPanel>div{padding-top:3px}
+.top{display:flex;gap:8px;align-items:flex-start;min-height:58px}.hudPanel{position:relative;width:40%;height:58px;background:center/100% 100% no-repeat;display:grid;place-items:center;text-align:center;overflow:hidden}.hudPanel.score{background-image:url('hud_score_panel.png')}.hudPanel>div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:0;line-height:1}.hudPanel br{display:none}.hudPanel b{display:block;max-width:92%;font-size:18px;line-height:.92;white-space:nowrap;overflow:hidden;text-overflow:clip}.hudPanel small{display:block;margin-top:1px;font-size:7px;line-height:1;letter-spacing:.8px;opacity:.8}
 #stageTimer{width:50px;height:48px;display:grid;place-items:center;text-align:center;background:rgba(0,0,0,.68);border:1px solid rgba(255,255,255,.22);font-weight:800;font-size:18px;line-height:1}#stageTimer small{display:block;margin-top:2px;font-size:7px;letter-spacing:1px;opacity:.75}#bonusToast{align-self:center;max-width:28%;min-height:20px;font-size:11px;font-weight:700;letter-spacing:.7px;text-align:left;text-shadow:0 2px 3px #000;opacity:0;transform:translateY(-3px);transition:opacity .12s linear,transform .12s linear;pointer-events:none}#bonusToast.show{opacity:1;transform:translateY(0)}
 .hudIcon{width:38px;height:38px;object-fit:contain;pointer-events:auto;cursor:pointer}.top .hudIcon:first-of-type{margin-left:auto}
 #tray{position:absolute;z-index:28;top:max(66px,calc(env(safe-area-inset-top) + 58px));left:50%;transform:translateX(-50%);width:78%;height:auto;aspect-ratio:1639/522;background:url('hud_powerup_tray.png') center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;gap:2.5%;pointer-events:none}.pu{position:relative;width:20%;aspect-ratio:1;border:0;background:transparent;padding:0;touch-action:manipulation;pointer-events:auto}.pu img{width:100%;height:100%;object-fit:contain}.pu.empty img{visibility:hidden}.pu.disabled:not(.empty){filter:grayscale(1) brightness(.45)}.charge{display:none}
@@ -103,7 +103,7 @@ const preload=[
 ];preload.forEach(src=>{const i=new Image();i.src=src});
 let state,actors=[],timeouts=[],raf=0,last=0,nextFly=0,nextMaggot=0,modeUntil=0,mode='normal';
 let lastFlyRow=-1;
-let pickup=null,powerPaused=false,freezeWorld=false,transitioning=false,bonusTimer=0,lastShownSecond=-1,magnetUntil=0,nextRushSpawn=0;
+let pickup=null,powerPaused=false,freezeWorld=false,transitioning=false,bonusTimer=0,lastShownSecond=-1,magnetUntil=0,pollinationUntil=0,nextRushSpawn=0;
 const MAX_FLIES_NORMAL=7,MAX_FLIES_FRENZY=10,MAX_MAGGOTS_NORMAL=7,MAX_MAGGOTS_RUSH=8,MAX_TOTAL_ACTORS=15;
 const POWER_DROP_EVERY=30;
 const STAGE_MS=30000;
@@ -147,6 +147,7 @@ const x=findFlySpawnX(),vx=(Math.random()-.5)*34,phase=Math.random()*Math.PI*2;
 const a={kind:'fly',type,el:e,frames,defeat:spec.defeat,frame:0,lastFrame:0,
 x,y:-70,vx,vy,hp,phase};
 actors.push(a);
+if(state.activePower==='pollination'&&performance.now()<pollinationUntil)freezeForPollination(a);
 e.addEventListener('pointerdown',ev=>{
 ev.preventDefault();
 if(a.dead||state.paused||(powerPaused&&!freezeWorld))return;
@@ -181,7 +182,7 @@ hud();
 }
 function maggotDistanceOK(x,y,minDist=75){return !actors.some(o=>o.kind==='maggot'&&!o.dead&&Math.abs(o.x-x)<minDist&&Math.abs(o.y-y)<90)}
 function findMaggotX(preferredX=null,minDist=75){const maxX=Math.max(1,arena.clientWidth-56);for(let i=0;i<18;i++){const x=preferredX==null?Math.random()*maxX:Math.max(0,Math.min(maxX,preferredX+(Math.random()*120-60)));if(maggotDistanceOK(x,-55,minDist))return x}return Math.random()*maxX}
-function addMaggot(x=null,y=null,minDist=75,source='sky'){if(!state.running||state.paused||powerPaused||transitioning)return;if(state.inRedemption&&source!=='rush')return;const cap=state.inRedemption?MAX_MAGGOTS_RUSH:(mode==='maggotRush'?MAX_MAGGOTS_RUSH:MAX_MAGGOTS_NORMAL);if(countKind('maggot')>=cap||actors.length>=MAX_TOTAL_ACTORS)return;const startX=findMaggotX(x,minDist),startY=y==null?-58:Math.max(-58,Math.min(arena.clientHeight*.7,y));const e=new Image();e.className='sprite maggot maggotFalling';e.src='maggot_crawl_01.png';arena.appendChild(e);const a={kind:'maggot',el:e,x:startX,y:startY,vy:source==='rush'?285+Math.random()*55:source==='carrier'?210+Math.random()*55:245+Math.random()*70,frame:0,lastFrame:0,source};actors.push(a);state.maggots++;e.addEventListener('pointerdown',ev=>{ev.preventDefault();if(a.dead||state.paused||powerPaused)return;killMaggot(a)})}
+function addMaggot(x=null,y=null,minDist=75,source='sky'){if(!state.running||state.paused||powerPaused||transitioning)return;if(state.inRedemption&&source!=='rush')return;const cap=state.inRedemption?MAX_MAGGOTS_RUSH:(mode==='maggotRush'?MAX_MAGGOTS_RUSH:MAX_MAGGOTS_NORMAL);if(countKind('maggot')>=cap||actors.length>=MAX_TOTAL_ACTORS)return;const startX=findMaggotX(x,minDist),startY=y==null?-58:Math.max(-58,Math.min(arena.clientHeight*.7,y));const e=new Image();e.className='sprite maggot maggotFalling';e.src='maggot_crawl_01.png';arena.appendChild(e);const a={kind:'maggot',el:e,x:startX,y:startY,vy:source==='rush'?285+Math.random()*55:source==='carrier'?210+Math.random()*55:245+Math.random()*70,frame:0,lastFrame:0,source};actors.push(a);state.maggots++;if(state.activePower==='pollination'&&performance.now()<pollinationUntil)freezeForPollination(a);e.addEventListener('pointerdown',ev=>{ev.preventDefault();if(a.dead||state.paused||powerPaused)return;killMaggot(a)})}
 function killMaggot(a){if(a.dead)return;a.dead=true;a.el.remove();actors=actors.filter(x=>x!==a);state.score+=1;state.hits++;addFx(a.x,a.y,'fx_maggot_pop.png');sfx('maggot_pop',.32);if(state.inRedemption){state.rushKills++;$('#modeTag').textContent=`MAGGOT RUSH • ${state.rushKills}/${state.rushTarget}`;if(state.rushKills>=state.rushTarget){finishMaggotRedemption(true);return}}hud()}
 function maggotLanded(a){if(a.dead)return;a.dead=true;a.el.remove();actors=actors.filter(x=>x!==a);if(state.inRedemption){state.misses++;hud();return}state.rot=Math.min(100,state.rot+10);sfx('maggot_split',.28);hud();if(state.rot>=100){startMaggotRedemption();return}for(let i=0;i<2;i++)later(()=>{if(state.running&&!state.paused&&!transitioning&&!state.inRedemption)addMaggot(null,-58,82,'sky')},220+i*180)}
 function unlockedPowers(stage=state.stage){if(stage<=2)return['pollination'];if(stage===3)return['pollination','magnet'];if(stage===4)return['pollination','magnet','love'];return['pollination','magnet','love','duality']}
@@ -238,8 +239,12 @@ function applyWave(stage=state.stage){if(mode!=='normal')endMode();const p=curre
 function completeInfestation(){if(!state.running||transitioning)return;if(state.paused||state.activePower||powerPaused){return}transitioning=true;powerPaused=true;freezeWorld=true;state.stageRemaining=0;updateTimer(true);if(mode!=='normal')endMode();clearPlayfield();$('#modeTag').textContent='';state.score+=500;hud();showBonus('+500 INFESTATION CLEAR',1800);showStageBanner('popup_infestation_complete.png',1500);sfx('ui_transition',.22);later(()=>{if(!state.running)return;state.stage++;transitioning=false;powerPaused=false;freezeWorld=false;applyWave(state.stage);scheduleStage()},STAGE_CLEAR_PAUSE)}
 function freezeGameplay(on=true){powerPaused=on}
 function powerIntro(p,cb){
-const meta=POWER_META[p];powerPaused=true;$('#modeTag').textContent=meta.label+' READY';showBanner(meta.popup,900);
-later(()=>{powerStage.innerHTML='';cb()},700);
+const meta=POWER_META[p];
+powerPaused=true;
+$('#modeTag').textContent=meta.label+' READY';
+const introMs=p==='pollination'?3000:1100;
+showBanner(meta.popup,introMs);
+later(()=>{powerStage.innerHTML='';cb()},introMs);
 }
 function powerOutro(label,delay=650){
 $('#modeTag').textContent=label+' COMPLETE';
@@ -264,7 +269,7 @@ magnet.style.cssText='width:48%;left:26%;bottom:42px;opacity:0;transform:scale(.
 powerStage.appendChild(magnet);
 requestAnimationFrame(()=>{magnet.style.opacity='1';magnet.style.transform='scale(1)'});
 const frames=['magnet_idle.png','magnet_pulse_01.png','magnet_pulse_02.png','magnet_pulse_03.png','magnet_pull_01.png','magnet_pull_02.png'];
-frames.forEach((src,i)=>later(()=>{if(state.activePower==='magnet'&&magnet.isConnected)magnet.src=src},i*620));
+frames.forEach((src,i)=>later(()=>{if(state.activePower==='magnet'&&magnet.isConnected)magnet.src=src},i*900));
 magnetUntil=performance.now()+5000;
 sfx('magnet_pull',.25);
 later(()=>{
@@ -288,50 +293,94 @@ magnetUntil=0;
 powerOutro('MAGNET',700);
 },5000);
 }
+function freezeForPollination(a){
+if(!a||a.dead||!pollinationUntil||performance.now()>=pollinationUntil)return;
+a.frozenUntil=pollinationUntil;
+a.el.style.filter='brightness(1.5) saturate(.18) drop-shadow(0 0 5px white)';
+a.el.style.pointerEvents='none';
+}
+function thawPollinationActors(){
+actors.forEach(a=>{
+if(a.dead)return;
+if((a.frozenUntil||0)<=performance.now()+50)a.frozenUntil=0;
+a.el.style.filter='';
+a.el.style.pointerEvents='';
+});
+}
 function runPollination(){
-$('#modeTag').textContent='ROTTEN POLLINATION ACTIVE';sfx('pollination_activate',.25);
-state.score+=100;showBonus('+100 POLLINATION');hud();
-freezeWorld=true;powerPaused=true;
+$('#modeTag').textContent='ROTTEN POLLINATION • BLOOM';
+sfx('pollination_activate',.25);
+state.score+=100;showBonus('+100 POLLINATION',1300);hud();
+powerPaused=true;freezeWorld=false;
 const bloomFrames=['pollination_bloom_01.png','pollination_bloom_02.png','pollination_bloom_03.png','pollination_bloom_04.png','pollination_bloom_05.png','pollination_bloom_06.png'];
-const bloom=new Image();bloom.className='powerActor';bloom.src=bloomFrames[0];
-bloom.style.cssText='width:48%;left:26%;bottom:42px;opacity:0;transform:scale(.8);transition:opacity .55s ease,transform .45s ease-out';
+const bloom=new Image();
+bloom.className='powerActor';
+bloom.src=bloomFrames[0];
+bloom.style.cssText='width:54%;left:23%;bottom:38px;opacity:0;transform:scale(.78);transition:opacity .45s ease,transform .55s ease-out';
 powerStage.appendChild(bloom);
 requestAnimationFrame(()=>{bloom.style.opacity='1';bloom.style.transform='scale(1)'});
-bloomFrames.forEach((src,i)=>later(()=>{if(state.activePower==='pollination'&&bloom.isConnected)bloom.src=src},i*330));
+bloomFrames.forEach((src,i)=>later(()=>{if(state.activePower==='pollination'&&bloom.isConnected)bloom.src=src},i*420));
 
-// Bloom first, then clouds 1-3 above the flower.
+// After bloom: cloud 1 -> 2 -> 3 above the flower.
 later(()=>{
 if(state.activePower!=='pollination'||!bloom.isConnected)return;
-const cloud=new Image();cloud.className='powerActor';cloud.src='pollination_cloud_01.png';
-cloud.style.cssText='width:48%;left:26%;bottom:210px;opacity:0;transform:translateY(12px) scale(.9);transition:opacity .35s ease,transform .4s ease-out';
+$('#modeTag').textContent='ROTTEN POLLINATION • CLOUD';
+const cloud=new Image();
+cloud.className='powerActor';
+cloud.src='pollination_cloud_01.png';
+cloud.style.cssText='width:52%;left:24%;bottom:220px;opacity:0;transform:translateY(14px) scale(.9);transition:opacity .3s ease,transform .4s ease-out';
 powerStage.appendChild(cloud);
 requestAnimationFrame(()=>{cloud.style.opacity='.96';cloud.style.transform='translateY(0) scale(1)'});
-later(()=>{if(cloud.isConnected)cloud.src='pollination_cloud_02.png'},420);
-later(()=>{if(cloud.isConnected)cloud.src='pollination_cloud_03.png'},840);
+later(()=>{if(cloud.isConnected)cloud.src='pollination_cloud_02.png'},520);
+later(()=>{if(cloud.isConnected)cloud.src='pollination_cloud_03.png'},1040);
 
-// Immediately after cloud 3, play the fade PNG and fade the cloud animation away.
+// Immediately after cloud 3: fade PNG, then fade cloud away.
 later(()=>{
 if(!cloud.isConnected)return;
 cloud.src='pollination_fade.png';
-cloud.style.opacity='.9';
-later(()=>{if(cloud.isConnected){cloud.style.opacity='0';cloud.style.transform='translateY(-16px) scale(1.08)'}},80);
-later(()=>cloud.remove(),650);
+cloud.style.opacity='.95';
+later(()=>{if(cloud.isConnected){cloud.style.opacity='0';cloud.style.transform='translateY(-20px) scale(1.08)'}},100);
+later(()=>cloud.remove(),700);
 
-// The flower now plays its freeze animation and freezes the full playfield.
+// Flower freezes, then begins a 10-second freeze field.
 bloom.src='pollination_freeze_01.png';
-bloom.style.width='52%';bloom.style.left='24%';bloom.style.bottom='40px';
-actors.forEach(x=>{x.el.style.filter='brightness(1.5) saturate(.18) drop-shadow(0 0 5px white)';x.el.style.pointerEvents='none'});
-sfx('pollination_freeze',.24);$('#modeTag').textContent='ROTTEN POLLINATION • FROZEN';
-later(()=>{if(bloom.isConnected)bloom.src='pollination_freeze_02.png'},520);
-
-// Hold the activated freeze for 3 seconds, then fade out.
+bloom.style.width='56%';bloom.style.left='22%';bloom.style.bottom='34px';
+$('#modeTag').textContent='ROTTEN POLLINATION • FREEZE';
+sfx('pollination_freeze',.24);
+later(()=>{if(bloom.isConnected)bloom.src='pollination_freeze_02.png'},650);
 later(()=>{
-if(bloom.isConnected){bloom.style.transition='opacity .7s ease,transform .7s ease';bloom.style.opacity='0';bloom.style.transform='scale(1.05)'}
-actors.forEach(x=>{x.el.style.filter='';x.el.style.pointerEvents=''});
-later(()=>powerOutro('POLLINATION',700),650);
-},3000);
-},940);
-},1980);
+if(state.activePower!=='pollination')return;
+pollinationUntil=performance.now()+10000;
+powerPaused=false;
+freezeWorld=false;
+actors.forEach(freezeForPollination);
+$('#modeTag').textContent='ROTTEN POLLINATION • FROZEN 10';
+
+const freezeTicker=()=>{
+if(state.activePower!=='pollination'||!pollinationUntil)return;
+const remaining=Math.max(0,Math.ceil((pollinationUntil-performance.now())/1000));
+$('#modeTag').textContent='ROTTEN POLLINATION • FROZEN '+remaining;
+if(remaining>0)later(freezeTicker,250);
+};
+freezeTicker();
+
+later(()=>{
+if(state.activePower!=='pollination')return;
+pollinationUntil=0;
+thawPollinationActors();
+const sparkle=new Image();
+sparkle.className='powerActor';
+sparkle.src='fx_dirty_sparkle.png';
+sparkle.style.cssText='width:36%;left:32%;bottom:72px;opacity:1;transform:scale(.75);transition:opacity .65s ease,transform .65s ease-out';
+powerStage.appendChild(sparkle);
+requestAnimationFrame(()=>{sparkle.style.transform='scale(1.2)'});
+if(bloom.isConnected){bloom.style.transition='opacity .65s ease,transform .65s ease';bloom.style.opacity='0';bloom.style.transform='scale(.85)'}
+later(()=>{sparkle.style.opacity='0'},260);
+later(()=>powerOutro('POLLINATION',700),700);
+},10000);
+},850);
+},1550);
+},2550);
 }
 function enemyBaseValue(x){
 if(x.kind==='maggot')return 1;
@@ -454,6 +503,7 @@ if(t>=nextFly&&mode!=='maggotRush'){addFly(chooseFly(plan.types||{basic:1}));nex
 if(t>=nextMaggot&&mode!=='flyFrenzy'){addMaggot(null,null,88);nextMaggot=t+plan.maggotMs}
 }
 for(const a of [...actors]){
+if(state.activePower==='pollination'&&t<pollinationUntil)freezeForPollination(a);
 if(a.dead||t<(a.frozenUntil||0))continue;
 if(state.activePower==='magnet'&&t<magnetUntil){
 const targetX=arena.clientWidth*.5-(a.kind==='fly'?34:28),targetY=arena.clientHeight-(a.kind==='fly'?92:82);
@@ -481,13 +531,13 @@ a.el.style.transform=`translate3d(${a.x}px,${a.y}px,0)`
 }
 raf=requestAnimationFrame(loop)
 }
-function reset(){playMusic('gameplay');clearAll();lastRotBlocks=0;lastShownSecond=-1;magnetUntil=0;nextRushSpawn=0;powerPaused=false;freezeWorld=false;transitioning=false;pickup=null;arena.innerHTML='';powerStage.innerHTML='';state=fresh();state.running=true;last=0;lastFlyRow=-1;mode='normal';modeUntil=0;$('#bonusToast').textContent='';$('#bonusToast').classList.remove('show');$('#results').classList.remove('show');$('#results').style.backgroundImage="linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.58)),url('bg_game_over.png')";$('#resultHeadline').src='popup_stage_failed.png';$('#pauseOverlay').classList.remove('show');hud();applyWave(1);raf=requestAnimationFrame(loop);scheduleStage()}
+function reset(){playMusic('gameplay');clearAll();lastRotBlocks=0;lastShownSecond=-1;magnetUntil=0;pollinationUntil=0;nextRushSpawn=0;powerPaused=false;freezeWorld=false;transitioning=false;pickup=null;arena.innerHTML='';powerStage.innerHTML='';state=fresh();state.running=true;last=0;lastFlyRow=-1;mode='normal';modeUntil=0;$('#bonusToast').textContent='';$('#bonusToast').classList.remove('show');$('#results').classList.remove('show');$('#results').style.backgroundImage="linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.58)),url('bg_game_over.png')";$('#resultHeadline').src='popup_stage_failed.png';$('#pauseOverlay').classList.remove('show');hud();applyWave(1);raf=requestAnimationFrame(loop);scheduleStage()}
 function scheduleStage(){state.stageRemaining=STAGE_MS;lastShownSecond=-1;updateTimer(true)}
 function endGame(){if(!state.running)return;state.running=false;state.paused=true;const acc=state.hits+state.misses?Math.round(state.hits/(state.hits+state.misses)*100):100;$('#resultHeadline').src='popup_stage_failed.png';$('#resultHeadline').alt='Game Over';$('#results').style.backgroundImage="linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.58)),url('bg_game_over.png')";$('#resultStats').innerHTML=`<strong>${state.score}</strong><br>SCORE<br>${state.kills} FLY KILLS • ${state.maggots} MAGGOTS<br>${acc}% ACCURACY`;$('#results').classList.add('show');playMusic('results');sfx('ui_transition')}
 function pause(force){if(!state.running)return;state.paused=force===undefined?!state.paused:force;$('#pauseOverlay').classList.toggle('show',state.paused);$('#pauseBtn').src=state.paused?'ui_resume.png':'ui_pause.png';sfx('ui_tap',.2)}
 const startGame=()=>{screen('play');reset()};
 function goHome(){
-state.running=false;state.paused=false;clearAll();powerPaused=false;freezeWorld=false;transitioning=false;pickup=null;mode='normal';modeUntil=0;last=0;lastRotBlocks=0;lastFlyRow=-1;magnetUntil=0;nextRushSpawn=0;clearTimeout(bonusTimer);
+state.running=false;state.paused=false;clearAll();powerPaused=false;freezeWorld=false;transitioning=false;pickup=null;mode='normal';modeUntil=0;last=0;lastRotBlocks=0;lastFlyRow=-1;magnetUntil=0;pollinationUntil=0;nextRushSpawn=0;clearTimeout(bonusTimer);
 arena.innerHTML='';powerStage.innerHTML='';banner.classList.remove('showBanner');$('#results').classList.remove('show');$('#pauseOverlay').classList.remove('show');$('#pauseBtn').src='ui_pause.png';
 screen('home');updateAudioIcons();if(musicOn)playMusic('menu');else stopMusic();
 }
